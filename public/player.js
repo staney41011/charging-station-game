@@ -70,9 +70,24 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function renderFloatBadge(player) {
+  const badge = $("#playerFloatBadge");
+  if (!badge) return;
+
+  if (!player) {
+    badge.hidden = true;
+    return;
+  }
+
+  badge.hidden = false;
+  setText("floatCode", normalizeCode(player.code));
+  setText("floatNickname", player.nickname || normalizeCode(player.code));
+}
+
 function renderPlayerToScreen(player) {
   if (!player) {
     document.body.classList.remove("player-in-game");
+    renderFloatBadge(null);
     currentPlayerCode = "";
     setText("summaryCode", "-");
     setText("summaryNickname", "-");
@@ -102,6 +117,7 @@ function renderPlayerToScreen(player) {
   const team = latestData.teams?.[normalizedPlayer.teamId];
   const carry = normalizedPlayer.carrying ? materialLabel(normalizedPlayer.carrying) : "無";
   const status = statusLabel(normalizedPlayer.status);
+  renderFloatBadge(normalizedPlayer);
 
   setText("summaryCode", normalizedPlayer.code || "-");
   setText("summaryNickname", normalizedPlayer.nickname || "-");

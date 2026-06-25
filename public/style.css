@@ -649,6 +649,44 @@ button:disabled {
   align-items: center;
 }
 
+.player-float-badge {
+  position: fixed;
+  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 8000;
+  display: grid;
+  gap: 2px;
+  min-width: 124px;
+  border: 1px solid rgba(70, 217, 200, 0.42);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(8, 17, 31, 0.94), rgba(16, 32, 55, 0.88)),
+    rgba(8, 17, 31, 0.92);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36), 0 0 18px rgba(70, 217, 200, 0.14);
+  padding: 10px 12px;
+  backdrop-filter: blur(16px);
+}
+
+.player-float-badge[hidden] {
+  display: none !important;
+}
+
+.player-float-badge span {
+  color: var(--cyan);
+  font-size: 1.18rem;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.player-float-badge strong {
+  color: #fff;
+  font-size: 0.9rem;
+  max-width: 128px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .player-body.player-in-game #activeActionCard {
   order: 1;
 }
@@ -1146,14 +1184,34 @@ body.boss-alert::after {
   content: "";
   position: fixed;
   z-index: 9999;
-  inset: 8px;
+  inset: 10px;
   pointer-events: none;
-  border: 6px solid rgba(255, 55, 85, 0.95);
-  border-radius: 30px;
+  border: 4px solid transparent;
+  border-radius: 34px;
+  background:
+    linear-gradient(90deg, rgba(255, 55, 85, 1), rgba(255, 206, 92, 0.92), rgba(255, 55, 85, 1)) border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   box-shadow:
-    0 0 26px rgba(255, 55, 85, 0.92),
-    inset 0 0 30px rgba(255, 55, 85, 0.26);
-  animation: boss-alert-pulse 0.78s ease-in-out infinite alternate;
+    0 0 28px rgba(255, 55, 85, 0.72),
+    0 0 70px rgba(255, 122, 43, 0.28);
+  animation: boss-alert-pulse 0.9s ease-in-out infinite alternate;
+}
+
+body.boss-alert::before {
+  content: "";
+  position: fixed;
+  z-index: 9998;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 55, 85, 0.20), transparent 38%),
+    linear-gradient(90deg, rgba(255,55,85,0.10), transparent 22%, transparent 78%, rgba(255,55,85,0.10));
+  mix-blend-mode: screen;
+  animation: boss-alert-wash 1.6s ease-in-out infinite alternate;
 }
 
 body.boss-alert .mission-card,
@@ -1173,12 +1231,23 @@ body.boss-alert .focus-card {
 
 @keyframes boss-alert-pulse {
   from {
-    opacity: 0.48;
-    transform: scale(0.998);
+    opacity: 0.42;
+    filter: saturate(1.1);
+    transform: scale(0.997);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    filter: saturate(1.8);
+    transform: scale(1.001);
+  }
+}
+
+@keyframes boss-alert-wash {
+  from {
+    opacity: 0.22;
+  }
+  to {
+    opacity: 0.62;
   }
 }
 
@@ -1325,7 +1394,6 @@ body.boss-alert .focus-card {
 
   .team-hero,
   .team-controls,
-  .team-dashboard-grid,
   .projector-layout {
     grid-template-columns: 1fr;
   }
@@ -1335,9 +1403,37 @@ body.boss-alert .focus-card {
   }
 
   .team-shell {
-    width: min(1240px, calc(100% - 32px));
+    width: min(100% - 14px, 760px);
     height: auto;
-    padding: 22px 0 64px;
+    padding: 10px 0 28px;
+    gap: 10px;
+  }
+
+  .team-hero {
+    padding: 14px;
+  }
+
+  .team-hero h1 {
+    font-size: clamp(1.75rem, 9vw, 2.8rem);
+  }
+
+  .team-body .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .team-dashboard-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 2px 2px 10px;
+    scrollbar-width: thin;
+  }
+
+  .team-dashboard-card {
+    flex: 0 0 min(88vw, 520px);
+    scroll-snap-align: start;
+    overflow: visible;
   }
 
   .team-dashboard-card .list,
@@ -1371,6 +1467,18 @@ body.boss-alert .focus-card {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .player-float-badge {
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    min-width: 106px;
+    border-radius: 16px;
+    padding: 9px 10px;
+  }
+
+  .player-float-badge span {
+    font-size: 1.05rem;
+  }
+
   .carry-summary {
     grid-column: 1 / -1;
   }
@@ -1386,6 +1494,124 @@ body.boss-alert .focus-card {
 
   .rank-grid-projector {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .team-body {
+    overflow: hidden;
+  }
+
+  .team-shell {
+    width: min(100vw - 12px, 1180px);
+    height: calc(100dvh - 12px);
+    padding: 6px 0;
+    gap: 6px;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  .team-hero {
+    grid-template-columns: minmax(220px, 0.7fr) minmax(420px, 1.3fr);
+    padding: 10px 12px;
+  }
+
+  .team-hero h1 {
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    margin-bottom: 4px;
+  }
+
+  .team-hero .lede,
+  .team-hero .eyebrow {
+    display: none;
+  }
+
+  .team-controls {
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+  }
+
+  .team-controls label {
+    gap: 4px;
+    font-size: 0.78rem;
+  }
+
+  .team-controls input,
+  .team-controls select,
+  .team-controls button,
+  .team-controls .primary-action {
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+
+  .team-body .stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .team-body .stat {
+    padding: 8px 10px;
+    border-radius: 16px;
+  }
+
+  .team-body .stat strong {
+    font-size: clamp(1.45rem, 4vw, 2.2rem);
+  }
+
+  .team-dashboard-grid {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1.18fr 0.9fr 1fr 1fr;
+    gap: 6px;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .team-dashboard-card {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    padding: 9px;
+    border-radius: 18px;
+  }
+
+  .team-dashboard-card .section-heading {
+    margin-bottom: 5px;
+  }
+
+  .team-dashboard-card h2 {
+    font-size: 1.05rem;
+  }
+
+  .team-dashboard-card .eyebrow {
+    display: none;
+  }
+
+  .team-dashboard-card .list,
+  .team-dashboard-card .inventory-grid {
+    max-height: calc(100dvh - 210px);
+    overflow: auto;
+  }
+
+  .team-body .message-strip {
+    max-height: 40px;
+    overflow: hidden;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  .team-body .member-row,
+  .team-body .boss-need-row,
+  .team-body .inventory-tile,
+  .team-body .need-row {
+    padding: 8px 9px;
+    border-radius: 14px;
+  }
+
+  .team-body .inventory-grid,
+  .team-body .need-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
   }
 }
 
