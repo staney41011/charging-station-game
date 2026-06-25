@@ -9,8 +9,8 @@
 </head>
 
 <body class="display-body">
-  <main class="display-shell">
-    <section class="display-stage">
+  <main class="display-shell battle-display-shell">
+    <section class="display-stage battle-stage">
       <div>
         <p class="eyebrow">充電站營業中</p>
         <h1 id="displayStatus">等待主持人開始遊戲</h1>
@@ -19,17 +19,14 @@
       <div class="display-live-chip" id="displayCounts">0 人加入</div>
     </section>
 
-    <section class="projector-layout">
-      <section class="projector-card mission-card" id="missionPanel"></section>
-      <section class="projector-card danger-card" id="downPanel"></section>
-    </section>
+    <section class="projector-card battle-arena" id="battlePanel"></section>
 
-    <section class="projector-card rank-card">
+    <section class="projector-card score-wall-card">
       <div class="projector-heading">
-        <span>組別排行榜</span>
-        <small>分數 · 訂單 · 支援 · 魔王</small>
+        <span>組別比分牆</span>
+        <small>依分數排序，最多 15 組同時顯示</small>
       </div>
-      <div id="rankGrid" class="rank-grid-projector"></div>
+      <div id="rankGrid" class="score-wall-grid"></div>
     </section>
   </main>
 

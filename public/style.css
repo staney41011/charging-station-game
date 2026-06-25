@@ -718,15 +718,15 @@ button:disabled {
 
 /* Team */
 .team-shell {
-  width: min(1540px, calc(100vw - 24px));
-  height: calc(100vh - 24px);
-  padding: 12px 0;
+  width: min(1320px, calc(100% - 16px));
+  min-height: 100dvh;
+  height: auto;
+  padding: 10px 0 28px;
   gap: 10px;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
 }
 
 .team-body {
-  overflow: hidden;
+  overflow: auto;
 }
 
 .team-hero {
@@ -751,6 +751,11 @@ button:disabled {
   align-items: end;
 }
 
+.team-controls-simple {
+  grid-template-columns: minmax(180px, 360px);
+  justify-content: end;
+}
+
 .team-body .stat-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
@@ -773,7 +778,7 @@ button:disabled {
 
 .team-dashboard-card {
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   padding: 14px;
 }
 
@@ -788,9 +793,9 @@ button:disabled {
 
 .team-dashboard-card .list,
 .team-dashboard-card .inventory-grid {
-  max-height: 100%;
+  max-height: none;
   min-height: 0;
-  overflow: auto;
+  overflow: visible;
   padding-right: 3px;
   scrollbar-width: thin;
 }
@@ -906,11 +911,291 @@ button:disabled {
     #040b16;
 }
 
-.display-body.has-down {
+.battle-display-shell {
+  grid-template-rows: auto minmax(300px, 0.98fr) minmax(330px, 1fr);
+}
+
+.battle-stage {
+  min-height: 0;
+}
+
+.battle-arena {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  overflow: hidden;
+  border-color: rgba(255, 206, 92, 0.44);
   background:
-    radial-gradient(circle at 8% 4%, rgba(255, 93, 115, 0.30), transparent 30%),
-    radial-gradient(circle at 90% 8%, rgba(255, 206, 92, 0.24), transparent 28%),
-    #050713;
+    radial-gradient(circle at 50% 18%, rgba(255, 206, 92, 0.16), transparent 30%),
+    radial-gradient(circle at 72% 50%, rgba(70, 217, 200, 0.12), transparent 28%),
+    rgba(7, 15, 28, 0.9);
+}
+
+.battle-arena::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  pointer-events: none;
+  background:
+    conic-gradient(from 120deg, transparent, rgba(70, 217, 200, 0.08), transparent, rgba(255, 206, 92, 0.10), transparent);
+  animation: arena-spin 18s linear infinite;
+}
+
+.battle-idle,
+.boss-battle-card {
+  position: relative;
+  z-index: 1;
+}
+
+.battle-idle {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  min-height: 100%;
+}
+
+.battle-idle h2 {
+  margin: 0;
+  color: var(--amber);
+  font-size: clamp(3rem, 7vw, 7.2rem);
+  line-height: 0.92;
+}
+
+.battle-idle p {
+  margin: 0;
+  color: #d7e7ff;
+  font-size: clamp(1.2rem, 2vw, 2rem);
+  font-weight: 900;
+}
+
+.idle-order {
+  display: inline-grid;
+  justify-self: start;
+  gap: 4px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 206, 92, 0.42);
+  border-radius: 22px;
+  background: rgba(255, 206, 92, 0.10);
+  padding: 14px 18px;
+}
+
+.idle-order span {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.idle-order strong {
+  color: #fff1c3;
+  font-size: clamp(1.3rem, 2.4vw, 2.5rem);
+}
+
+.boss-battle-card {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.05fr) minmax(280px, 0.75fr);
+  grid-template-rows: auto auto;
+  gap: 18px 24px;
+  align-items: center;
+  min-height: 100%;
+}
+
+.boss-battle-copy h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(3.2rem, 7vw, 8.5rem);
+  line-height: 0.9;
+  text-shadow: 0 0 28px rgba(255, 93, 115, 0.35);
+}
+
+.battle-callout {
+  margin-top: 14px;
+  color: #ffe3e8;
+  font-size: clamp(1.2rem, 2vw, 2.3rem);
+  font-weight: 1000;
+}
+
+.boss-core {
+  justify-self: center;
+  width: min(25vw, 330px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 5px solid rgba(255, 206, 92, 0.74);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 206, 92, 0.34), transparent 42%),
+    radial-gradient(circle, rgba(255, 55, 85, 0.42), rgba(30, 6, 16, 0.92) 70%);
+  box-shadow:
+    0 0 38px rgba(255, 55, 85, 0.55),
+    inset 0 0 42px rgba(255, 206, 92, 0.24);
+  animation: boss-core-pulse 1.15s ease-in-out infinite alternate;
+}
+
+.boss-core span {
+  color: var(--amber);
+  font-size: clamp(5rem, 10vw, 10rem);
+  font-weight: 1000;
+  line-height: 0.8;
+}
+
+.boss-core small {
+  color: #fff5ca;
+  font-size: clamp(1.2rem, 2vw, 2rem);
+  font-weight: 1000;
+}
+
+.boss-hp-track {
+  grid-column: 1 / -1;
+  height: 34px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.boss-hp-fill {
+  height: 100%;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, #64e186, #ffce5c 48%, #ff5d73),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.16) 0 10px, transparent 10px 20px);
+  box-shadow: 0 0 24px rgba(255, 93, 115, 0.4);
+}
+
+.battle-needs {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.battle-need-chip {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 12px;
+}
+
+.battle-need-chip span,
+.battle-need-chip strong {
+  position: relative;
+  z-index: 1;
+}
+
+.battle-need-chip span {
+  display: block;
+  color: #d7e7ff;
+  font-weight: 900;
+}
+
+.battle-need-chip strong {
+  color: #fff;
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+}
+
+.battle-need-chip i {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 5px;
+  display: block;
+  background: linear-gradient(90deg, var(--cyan), var(--amber));
+}
+
+.score-wall-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.score-wall-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 8px;
+  overflow: hidden;
+}
+
+.score-wall-row {
+  display: grid;
+  grid-template-columns: 34px minmax(96px, 1fr) minmax(78px, 0.72fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 0;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+  padding: 8px 10px;
+}
+
+.score-wall-row.top {
+  border-color: rgba(255, 206, 92, 0.72);
+  background:
+    linear-gradient(135deg, rgba(255, 206, 92, 0.20), rgba(255,255,255,0.04));
+}
+
+.score-rank {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(70, 217, 200, 0.16);
+  color: #d4fff8;
+  font-weight: 1000;
+}
+
+.score-team strong {
+  display: block;
+  color: #fff;
+  font-size: clamp(1rem, 1.35vw, 1.4rem);
+  line-height: 1.05;
+}
+
+.score-team span {
+  color: #b8c7dc;
+  font-size: clamp(0.72rem, 0.9vw, 0.95rem);
+  font-weight: 800;
+}
+
+.score-bar {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+}
+
+.score-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--cyan), var(--amber));
+}
+
+.score-value {
+  color: var(--amber);
+  font-size: clamp(1.7rem, 3vw, 3.3rem);
+  font-weight: 1000;
+  line-height: 0.9;
+}
+
+@keyframes arena-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes boss-core-pulse {
+  from {
+    transform: scale(0.97);
+    filter: saturate(1);
+  }
+  to {
+    transform: scale(1.03);
+    filter: saturate(1.45);
+  }
 }
 
 .display-shell {
@@ -977,10 +1262,6 @@ button:disabled {
 
 .mission-card {
   border-color: rgba(255, 206, 92, 0.38);
-}
-
-.danger-card {
-  border-color: rgba(255, 93, 115, 0.38);
 }
 
 .mission-label {
@@ -1499,15 +1780,15 @@ body.boss-alert .focus-card {
 
 @media (max-height: 560px) and (orientation: landscape) {
   .team-body {
-    overflow: hidden;
+    overflow: auto;
   }
 
   .team-shell {
     width: min(100vw - 12px, 1180px);
-    height: calc(100dvh - 12px);
+    min-height: 100dvh;
+    height: auto;
     padding: 6px 0;
     gap: 6px;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
   }
 
   .team-hero {
@@ -1570,7 +1851,7 @@ body.boss-alert .focus-card {
   .team-dashboard-card {
     min-width: 0;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     padding: 9px;
     border-radius: 18px;
   }
@@ -1589,8 +1870,8 @@ body.boss-alert .focus-card {
 
   .team-dashboard-card .list,
   .team-dashboard-card .inventory-grid {
-    max-height: calc(100dvh - 210px);
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .team-body .message-strip {

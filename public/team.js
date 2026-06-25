@@ -1,18 +1,11 @@
 const db = initFirebase();
 const teamSelect = $("#teamSelect");
-const helpSelect = $("#helpMaterial");
 
 let latestData = defaultState();
 let submittingOrder = false;
 
 function statusLabel(status) {
   return status === "down" ? "沒電" : "正常";
-}
-
-function initHelpOptions() {
-  helpSelect.innerHTML = MATERIALS.map(material => `
-    <option value="${material}">${materialLabel(material)}</option>
-  `).join("");
 }
 
 function renderTeamOptions(data) {
@@ -113,7 +106,7 @@ function renderOrderForTeam(order, team) {
     <div class="progress order-progress"><div class="progress-bar" style="width:${pct}%"></div></div>
     <div class="need-grid">${needs}</div>
     <div class="notice ${canComplete ? "ok-notice" : ""}">
-      ${canComplete ? "材料已足夠，可以交付訂單。" : "材料尚未足夠，請派組員收集或發出求援。"}
+      ${canComplete ? "材料已足夠，可以交付訂單。" : "材料尚未足夠，請派組員收集材料。"}
     </div>
     <button id="submitOrderBtn" class="primary-action" ${canComplete ? "" : "disabled"}>交付訂單</button>
   `;
@@ -264,8 +257,6 @@ async function submitOrder(teamId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  initHelpOptions();
-
   db.ref("/").on("value", snap => {
     const data = snap.val() || defaultState();
     document.body.classList.toggle("boss-alert", data.boss && data.boss.active === true);
@@ -277,17 +268,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   teamSelect.addEventListener("change", () => renderTeam(latestData));
-
-  $("#requestHelpBtn").addEventListener("click", async () => {
-    const selected = teamSelect.value;
-    const team = latestData.teams?.[selected];
-    const material = helpSelect.value;
-
-    if (!selected || !team) {
-      alert("請先選擇組別。");
-      return;
-    }
-
-    await db.ref("/game/message").set(`${teamDisplayName(selected, team)} 急缺：${materialLabel(material)}`);
-  });
 });
