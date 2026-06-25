@@ -9,11 +9,11 @@ function gameStatusText(status, bossActive) {
   if (bossActive) return "魔王戰進行中";
 
   return {
-    lobby: "等待主持人開始遊戲",
-    running: "遊戲進行中，等待魔王現身",
+    lobby: "充電站準備中",
+    running: "遊戲進行中",
     paused: "遊戲暫停",
     ended: "遊戲結束"
-  }[status] || "等待主持人開始遊戲";
+  }[status] || "充電站準備中";
 }
 
 function displaySubtitle(data, bossActive) {
@@ -25,14 +25,14 @@ function displaySubtitle(data, bossActive) {
   }
 
   if (game.status === "running") {
-    return "各組累積分數，等待主持人釋放魔王。";
+    return "各組正在累積能量，完成任務、互相支援。";
   }
 
   if (game.status === "ended") {
     return "遊戲結束，請看總分結算。";
   }
 
-  return "請玩家加入遊戲，等待主持人開始。";
+  return "請玩家加入遊戲，一起把充電站準備好。";
 }
 
 function renderBattlePanel(data, bossActive) {
@@ -43,9 +43,9 @@ function renderBattlePanel(data, bossActive) {
 
     return `
       <div class="battle-idle">
-        <p class="eyebrow">下一波戰役</p>
-        <h2>魔王尚未現身</h2>
-        <p>現在是蓄能時間，各組請衝分、補庫存、準備下一波魔王戰。</p>
+        <p class="eyebrow">充電站補給時間</p>
+        <h2>各組蓄能中</h2>
+        <p>完成訂單、互相支援、補足庫存，把全場能量一起拉起來。</p>
         <div class="idle-order">
           <span>目前訂單</span>
           <strong>${order && order.active === true ? order.name : "等待下一張訂單"}</strong>
@@ -128,8 +128,12 @@ db.ref("/").on("value", snap => {
   const totalSlots = Number(game.totalPlayers || 0);
   const bossActive = hasActiveBoss(data);
 
-  document.body.classList.toggle("boss-alert", bossActive);
-  document.body.classList.toggle("display-boss-mode", bossActive);
+  document.body.classList.remove("boss-alert", "display-boss-mode", "display-rest-mode");
+  if (bossActive) {
+    document.body.classList.add("boss-alert", "display-boss-mode");
+  } else {
+    document.body.classList.add("display-rest-mode");
+  }
   $("#displayStatus").textContent = gameStatusText(game.status, bossActive);
   $("#displayMessage").textContent = displaySubtitle(data, bossActive);
   $("#displayCounts").textContent = totalSlots ? `${joined} / ${totalSlots} 人加入` : `${joined} 人加入`;

@@ -920,6 +920,19 @@ body.display-boss-mode.display-body {
     linear-gradient(135deg, #050610 0%, #150510 48%, #070914 100%);
 }
 
+body.display-rest-mode.display-body {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(70, 217, 200, 0.24), transparent 30%),
+    radial-gradient(circle at 88% 10%, rgba(255, 206, 92, 0.15), transparent 30%),
+    radial-gradient(circle at 50% 95%, rgba(102, 225, 134, 0.10), transparent 34%),
+    linear-gradient(135deg, #03111d 0%, #071b25 52%, #0b1321 100%);
+}
+
+body.display-rest-mode.boss-alert::before,
+body.display-rest-mode.boss-alert::after {
+  display: none;
+}
+
 .battle-display-shell {
   width: min(1880px, calc(100% - 28px));
   grid-template-rows: minmax(118px, 0.16fr) minmax(360px, 0.48fr) minmax(300px, 0.36fr);
@@ -941,6 +954,16 @@ body.display-boss-mode .battle-stage {
   box-shadow:
     0 0 0 1px rgba(255, 46, 91, 0.22),
     0 0 42px rgba(255, 46, 91, 0.18);
+}
+
+body.display-rest-mode .battle-stage {
+  border-color: rgba(70, 217, 200, 0.32);
+  background:
+    linear-gradient(135deg, rgba(70, 217, 200, 0.18), rgba(255, 206, 92, 0.08)),
+    rgba(8, 21, 32, 0.88);
+  box-shadow:
+    var(--shadow),
+    0 0 34px rgba(70, 217, 200, 0.08);
 }
 
 .battle-arena {
@@ -966,6 +989,17 @@ body.display-boss-mode .battle-arena {
     0 0 44px rgba(255, 46, 91, 0.18);
 }
 
+body.display-rest-mode .battle-arena {
+  border-color: rgba(70, 217, 200, 0.30);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(70, 217, 200, 0.18), transparent 28%),
+    radial-gradient(circle at 76% 36%, rgba(255, 206, 92, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(7, 23, 34, 0.94), rgba(9, 18, 31, 0.90));
+  box-shadow:
+    inset 0 0 72px rgba(70, 217, 200, 0.06),
+    0 0 30px rgba(70, 217, 200, 0.08);
+}
+
 .battle-arena::before {
   content: "";
   position: absolute;
@@ -983,6 +1017,14 @@ body.display-boss-mode .battle-arena::before {
     radial-gradient(circle at 86% 42%, rgba(255, 46, 91, 0.34), transparent 24%);
   opacity: 0.78;
   animation: boss-arena-sweep 3.8s ease-in-out infinite alternate;
+}
+
+body.display-rest-mode .battle-arena::before {
+  inset: -30%;
+  background:
+    conic-gradient(from 80deg, transparent, rgba(70, 217, 200, 0.08), transparent, rgba(255, 206, 92, 0.08), transparent);
+  opacity: 0.62;
+  animation: arena-spin 28s linear infinite;
 }
 
 body.display-boss-mode .battle-arena::after {
@@ -1019,11 +1061,21 @@ body.display-boss-mode .battle-arena::after {
   line-height: 0.92;
 }
 
+body.display-rest-mode .battle-idle h2 {
+  color: #d8fff8;
+  text-shadow: 0 0 26px rgba(70, 217, 200, 0.18);
+}
+
 .battle-idle p {
   margin: 0;
   color: #d7e7ff;
   font-size: clamp(1.2rem, 2vw, 2rem);
   font-weight: 900;
+}
+
+body.display-rest-mode .battle-idle p {
+  max-width: 980px;
+  color: #dcecff;
 }
 
 .idle-order {
@@ -1035,6 +1087,12 @@ body.display-boss-mode .battle-arena::after {
   border-radius: 22px;
   background: rgba(255, 206, 92, 0.10);
   padding: 14px 18px;
+}
+
+body.display-rest-mode .idle-order {
+  border-color: rgba(70, 217, 200, 0.34);
+  background:
+    linear-gradient(135deg, rgba(70, 217, 200, 0.12), rgba(255, 206, 92, 0.08));
 }
 
 .idle-order span {
@@ -1211,6 +1269,13 @@ body.display-boss-mode .score-wall-card {
   background:
     linear-gradient(180deg, rgba(7, 12, 24, 0.96), rgba(10, 12, 22, 0.92)),
     radial-gradient(circle at 12% 0%, rgba(255, 46, 91, 0.13), transparent 34%);
+}
+
+body.display-rest-mode .score-wall-card {
+  border-color: rgba(70, 217, 200, 0.22);
+  background:
+    linear-gradient(180deg, rgba(6, 18, 30, 0.95), rgba(7, 13, 25, 0.92)),
+    radial-gradient(circle at 50% 0%, rgba(70, 217, 200, 0.11), transparent 36%);
 }
 
 .score-wall-grid {
