@@ -135,6 +135,7 @@ db.ref("/").on("value", snap => {
   const totalSlots = Number(game.totalPlayers || 0);
 
   $("#displayStatus").textContent = gameStatusText(game.status, data.boss);
+  document.body.classList.toggle("boss-alert", data.boss && data.boss.active === true);
   $("#displayMessage").textContent = game.message || "等待主持人訊息。";
   $("#displayCounts").textContent = totalSlots ? `${joined} / ${totalSlots} 人加入` : `${joined} 人加入`;
   $("#missionPanel").innerHTML = renderMission(data);

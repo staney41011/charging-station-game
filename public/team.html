@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>店長頁</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./style.css?v=dev15-20260625-2" />
 </head>
 
 <body class="team-body">
@@ -31,8 +31,8 @@
 
     <section id="teamStats" class="stat-grid"></section>
 
-    <section class="team-main-grid">
-      <section class="card section focus-card">
+    <section class="team-dashboard-grid">
+      <section class="card section focus-card team-dashboard-card order-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Order</p>
@@ -42,7 +42,7 @@
         <div id="orderBox" class="list"></div>
       </section>
 
-      <section class="card section">
+      <section class="card section team-dashboard-card boss-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Boss</p>
@@ -51,10 +51,8 @@
         </div>
         <div id="bossNeed" class="list"></div>
       </section>
-    </section>
 
-    <section class="team-main-grid">
-      <section class="card section">
+      <section class="card section team-dashboard-card members-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Members</p>
@@ -64,7 +62,7 @@
         <div id="memberList" class="list"></div>
       </section>
 
-      <section class="card section">
+      <section class="card section team-dashboard-card inventory-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Stock</p>
@@ -88,8 +86,8 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-  <script src="./firebase-config.js"></script>
-  <script src="./app.js"></script>
-  <script src="./team.js"></script>
+  <script src="./firebase-config.js?v=dev15-20260625-2"></script>
+  <script src="./app.js?v=dev15-20260625-2"></script>
+  <script src="./team.js?v=dev15-20260625-2"></script>
 </body>
 </html>

@@ -268,6 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   db.ref("/").on("value", snap => {
     const data = snap.val() || defaultState();
+    document.body.classList.toggle("boss-alert", data.boss && data.boss.active === true);
     renderTeam(data);
 
     ensureRandomOrder(db, data).catch(err => {

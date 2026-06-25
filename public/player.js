@@ -72,6 +72,7 @@ function setText(id, value) {
 
 function renderPlayerToScreen(player) {
   if (!player) {
+    document.body.classList.remove("player-in-game");
     currentPlayerCode = "";
     setText("summaryCode", "-");
     setText("summaryNickname", "-");
@@ -87,6 +88,8 @@ function renderPlayerToScreen(player) {
     $("#downSection").hidden = true;
     return;
   }
+
+  document.body.classList.add("player-in-game");
 
   const normalizedPlayer = {
     ...player,
@@ -840,6 +843,7 @@ async function applyManualPayload() {
 document.addEventListener("DOMContentLoaded", async () => {
   db.ref("/").on("value", snap => {
     latestData = snap.val() || defaultState();
+    document.body.classList.toggle("boss-alert", latestData.boss && latestData.boss.active === true);
     refreshJoinOptions(latestData);
 
     if (!currentPlayerCode) {

@@ -649,14 +649,61 @@ button:disabled {
   align-items: center;
 }
 
+.player-body.player-in-game #activeActionCard {
+  order: 1;
+}
+
+.player-body.player-in-game #scannerSection {
+  order: 2;
+}
+
+.player-body.player-in-game #downSection {
+  order: 1;
+}
+
+.player-body.player-in-game .result-card {
+  order: 3;
+}
+
+.player-body.player-in-game .player-identity-card {
+  order: 80;
+}
+
+.player-body.player-in-game .player-setup-grid {
+  order: 90;
+}
+
+.player-body.player-in-game .player-identity-card,
+.player-body.player-in-game .player-setup-grid {
+  opacity: 0.9;
+}
+
 /* Team */
 .team-shell {
-  width: min(1240px, calc(100% - 32px));
+  width: min(1540px, calc(100vw - 24px));
+  height: calc(100vh - 24px);
+  padding: 12px 0;
+  gap: 10px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.team-body {
+  overflow: hidden;
 }
 
 .team-hero {
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(300px, 0.8fr) minmax(520px, 1.2fr);
   align-items: end;
+  padding: 16px 18px;
+}
+
+.team-hero h1 {
+  font-size: clamp(2rem, 3vw, 3.8rem);
+}
+
+.team-hero .lede {
+  margin-bottom: 0;
+  font-size: 0.98rem;
 }
 
 .team-controls {
@@ -664,6 +711,70 @@ button:disabled {
   grid-template-columns: 1fr 1fr auto;
   gap: 12px;
   align-items: end;
+}
+
+.team-body .stat-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.team-body .stat {
+  padding: 12px 14px;
+}
+
+.team-body .stat strong {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+}
+
+.team-dashboard-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(300px, 1.2fr) minmax(260px, 0.9fr) minmax(300px, 1fr) minmax(280px, 1fr);
+  gap: 10px;
+}
+
+.team-dashboard-card {
+  min-height: 0;
+  overflow: hidden;
+  padding: 14px;
+}
+
+.team-dashboard-card .section-heading {
+  margin-bottom: 8px;
+}
+
+.team-dashboard-card h2 {
+  margin-bottom: 0;
+  font-size: clamp(1.25rem, 1.8vw, 1.8rem);
+}
+
+.team-dashboard-card .list,
+.team-dashboard-card .inventory-grid {
+  max-height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 3px;
+  scrollbar-width: thin;
+}
+
+.team-body .message-strip {
+  padding: 10px 14px;
+  font-size: 0.98rem;
+}
+
+.team-body .order-hero strong {
+  font-size: clamp(2.2rem, 4vw, 4.2rem);
+}
+
+.team-body .inventory-tile,
+.team-body .need-row {
+  min-height: 68px;
+  padding: 10px 12px;
+}
+
+.team-body .member-row,
+.team-body .boss-need-row {
+  padding: 10px 12px;
 }
 
 .inventory-grid,
@@ -750,7 +861,7 @@ button:disabled {
 /* Display */
 .display-body {
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
   background:
     radial-gradient(circle at 8% 4%, rgba(70, 217, 200, 0.28), transparent 30%),
     radial-gradient(circle at 90% 8%, rgba(255, 206, 92, 0.24), transparent 28%),
@@ -767,7 +878,11 @@ button:disabled {
 .display-shell {
   width: min(1500px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 22px 0 34px;
+  height: 100vh;
+  padding: 14px 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.82fr);
+  gap: 12px;
 }
 
 .display-stage {
@@ -781,12 +896,12 @@ button:disabled {
     linear-gradient(135deg, rgba(70, 217, 200, 0.18), rgba(255, 206, 92, 0.10)),
     rgba(8, 17, 31, 0.86);
   box-shadow: var(--shadow);
-  padding: 26px 30px;
+  padding: 20px 26px;
 }
 
 .display-stage h1 {
   margin-bottom: 8px;
-  font-size: clamp(3rem, 6vw, 7rem);
+  font-size: clamp(2.6rem, 5vw, 6rem);
 }
 
 .display-stage p:last-child {
@@ -807,16 +922,19 @@ button:disabled {
 }
 
 .projector-layout {
-  margin-top: 18px;
+  min-height: 0;
+  margin-top: 0;
   grid-template-columns: 1.35fr 0.9fr;
 }
 
 .projector-card {
+  min-height: 0;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 30px;
   background: rgba(10, 20, 36, 0.88);
   box-shadow: var(--shadow);
-  padding: 24px;
+  padding: 20px;
 }
 
 .mission-card {
@@ -943,7 +1061,7 @@ button:disabled {
 }
 
 .rank-card {
-  margin-top: 18px;
+  margin-top: 0;
 }
 
 .projector-heading {
@@ -965,7 +1083,9 @@ button:disabled {
 .rank-grid-projector {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .team-rank-card {
@@ -976,7 +1096,7 @@ button:disabled {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.055);
-  padding: 14px;
+  padding: 12px;
 }
 
 .team-rank-card.top {
@@ -1020,6 +1140,46 @@ button:disabled {
   color: #d8e5f7;
   font-size: 1.2rem;
   font-weight: 900;
+}
+
+body.boss-alert::after {
+  content: "";
+  position: fixed;
+  z-index: 9999;
+  inset: 8px;
+  pointer-events: none;
+  border: 6px solid rgba(255, 55, 85, 0.95);
+  border-radius: 30px;
+  box-shadow:
+    0 0 26px rgba(255, 55, 85, 0.92),
+    inset 0 0 30px rgba(255, 55, 85, 0.26);
+  animation: boss-alert-pulse 0.78s ease-in-out infinite alternate;
+}
+
+body.boss-alert .mission-card,
+body.boss-alert .player-action-card,
+body.boss-alert .team-dashboard-card,
+body.boss-alert .display-stage {
+  border-color: rgba(255, 55, 85, 0.72);
+}
+
+body.boss-alert .display-stage,
+body.boss-alert .player-action-card,
+body.boss-alert .focus-card {
+  box-shadow:
+    var(--shadow),
+    0 0 34px rgba(255, 55, 85, 0.18);
+}
+
+@keyframes boss-alert-pulse {
+  from {
+    opacity: 0.48;
+    transform: scale(0.998);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* QR cards and print pages */
@@ -1165,8 +1325,25 @@ button:disabled {
 
   .team-hero,
   .team-controls,
+  .team-dashboard-grid,
   .projector-layout {
     grid-template-columns: 1fr;
+  }
+
+  .team-body {
+    overflow: auto;
+  }
+
+  .team-shell {
+    width: min(1240px, calc(100% - 32px));
+    height: auto;
+    padding: 22px 0 64px;
+  }
+
+  .team-dashboard-card .list,
+  .team-dashboard-card .inventory-grid {
+    max-height: none;
+    overflow: visible;
   }
 }
 
