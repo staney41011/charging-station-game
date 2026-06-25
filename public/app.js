@@ -1,4 +1,14 @@
-const MATERIALS = ["wire", "outlet", "wifi", "fast_cable", "power_bank", "reboot", "reminder", "companion", "support"];
+const MATERIALS = [
+  "wire",
+  "outlet",
+  "wifi",
+  "fast_cable",
+  "power_bank",
+  "reboot",
+  "reminder",
+  "companion",
+  "support"
+];
 
 const MATERIAL_LABELS = {
   wire: "充電線",
@@ -12,16 +22,14 @@ const MATERIAL_LABELS = {
   support: "陪伴卡"
 };
 
-const TEAM_LETTERS = ["A", "B", "C", "D", "E", "F"];
-
-const TEAM_NAMES = {
-  team1: "A",
-  team2: "B",
-  team3: "C",
-  team4: "D",
-  team5: "E",
-  team6: "F"
-};
+const MAX_TEAMS = 15;
+const DEFAULT_TEAM_COUNT = 15;
+const DEFAULT_TEAM_SIZE = 4;
+const TEAM_LETTERS = Array.from({ length: MAX_TEAMS }, (_, i) => String.fromCharCode(65 + i));
+const TEAM_NAMES = TEAM_LETTERS.reduce((map, letter, index) => {
+  map[`team${index + 1}`] = letter;
+  return map;
+}, {});
 
 const BOSS_DEFS = {
   boss1: {
@@ -48,42 +56,42 @@ const BOSS_DEFS = {
 
 const ORDER_DEFS = {
   order1: {
-    name: "手機快充組",
+    name: "快充補給單",
     reward: 10,
     required: { wire: 2, outlet: 1, fast_cable: 1 }
   },
   order2: {
-    name: "全場連線組",
+    name: "全場連線單",
     reward: 12,
     required: { wifi: 3, power_bank: 1, wire: 1 }
   },
   order3: {
-    name: "重新啟動組",
+    name: "重新啟動單",
     reward: 15,
     required: { reboot: 2, reminder: 2, support: 1 }
   },
   order4: {
-    name: "陪伴支援組",
+    name: "同行支援單",
     reward: 18,
     required: { companion: 2, support: 2, power_bank: 2 }
   },
   order5: {
-    name: "臨時補電組",
+    name: "臨時補電單",
     reward: 14,
     required: { power_bank: 2, outlet: 2, wire: 1 }
   },
   order6: {
-    name: "穩定訊號組",
+    name: "穩定訊號單",
     reward: 16,
     required: { wifi: 3, reboot: 1, companion: 1 }
   },
   order7: {
-    name: "週三提醒組",
+    name: "週三提醒單",
     reward: 14,
     required: { reminder: 3, support: 1, fast_cable: 1 }
   },
   order8: {
-    name: "全員支援組",
+    name: "全員支援單",
     reward: 20,
     required: { companion: 2, support: 2, reminder: 2, wifi: 1 }
   }
@@ -92,6 +100,9 @@ const ORDER_DEFS = {
 window.APP = {
   MATERIALS,
   MATERIAL_LABELS,
+  MAX_TEAMS,
+  DEFAULT_TEAM_COUNT,
+  DEFAULT_TEAM_SIZE,
   TEAM_LETTERS,
   TEAM_NAMES,
   BOSS_DEFS,
@@ -100,6 +111,9 @@ window.APP = {
 
 window.MATERIALS = MATERIALS;
 window.MATERIAL_LABELS = MATERIAL_LABELS;
+window.MAX_TEAMS = MAX_TEAMS;
+window.DEFAULT_TEAM_COUNT = DEFAULT_TEAM_COUNT;
+window.DEFAULT_TEAM_SIZE = DEFAULT_TEAM_SIZE;
 window.TEAM_LETTERS = TEAM_LETTERS;
 window.TEAM_NAMES = TEAM_NAMES;
 window.BOSS_DEFS = BOSS_DEFS;
@@ -112,6 +126,20 @@ function normalizeCode(code) {
   return String(code || "").trim().toUpperCase();
 }
 window.normalizeCode = normalizeCode;
+
+function normalizeTeamCount(value) {
+  const n = Number(value || DEFAULT_TEAM_COUNT);
+  if (!Number.isFinite(n)) return DEFAULT_TEAM_COUNT;
+  return Math.max(1, Math.min(MAX_TEAMS, Math.floor(n)));
+}
+window.normalizeTeamCount = normalizeTeamCount;
+
+function normalizeTeamSize(value) {
+  const n = Number(value || DEFAULT_TEAM_SIZE);
+  if (!Number.isFinite(n)) return DEFAULT_TEAM_SIZE;
+  return Math.max(1, Math.min(99, Math.floor(n)));
+}
+window.normalizeTeamSize = normalizeTeamSize;
 
 function parsePayload(text) {
   const raw = String(text || "").trim();
@@ -129,22 +157,75 @@ function materialLabel(material) {
 }
 window.materialLabel = materialLabel;
 
-function teamCapacity(totalPlayers, index) {
-  const base = Math.floor(totalPlayers / 6);
-  const extra = totalPlayers % 6;
+function teamNumber(teamId) {
+  const n = Number(String(teamId || "").replace(/^team/i, ""));
+  return Number.isInteger(n) && n > 0 ? n : 0;
+}
+window.teamNumber = teamNumber;
+
+function teamLetter(teamId) {
+  return TEAM_NAMES[teamId] || "";
+}
+window.teamLetter = teamLetter;
+
+function teamDisplayName(teamId, team) {
+  const n = teamNumber(teamId);
+  return team?.name || (n ? `第 ${n} 組` : "未選擇組別");
+}
+window.teamDisplayName = teamDisplayName;
+
+function sortedTeamEntries(teams) {
+  return Object.entries(teams || {}).sort(([a], [b]) => teamNumber(a) - teamNumber(b));
+}
+window.sortedTeamEntries = sortedTeamEntries;
+
+function teamCapacity(totalPlayers, index, teamCount = DEFAULT_TEAM_COUNT) {
+  const count = normalizeTeamCount(teamCount);
+  const total = Math.max(0, Number(totalPlayers || 0));
+  const base = Math.floor(total / count);
+  const extra = total % count;
   return base + (index < extra ? 1 : 0);
 }
 window.teamCapacity = teamCapacity;
+
+function makeTeam(teamId, index, teamSize) {
+  return {
+    name: `第 ${index + 1} 組`,
+    letter: TEAM_LETTERS[index],
+    capacity: normalizeTeamSize(teamSize),
+    score: 0,
+    supportPoints: 0,
+    bossContribution: 0,
+    completedOrders: 0,
+    inventory: {}
+  };
+}
+window.makeTeam = makeTeam;
+
+function makeTeams(teamCount = DEFAULT_TEAM_COUNT, teamSize = DEFAULT_TEAM_SIZE) {
+  const count = normalizeTeamCount(teamCount);
+  const size = normalizeTeamSize(teamSize);
+  const teams = {};
+
+  for (let i = 0; i < count; i++) {
+    teams[`team${i + 1}`] = makeTeam(`team${i + 1}`, i, size);
+  }
+
+  return teams;
+}
+window.makeTeams = makeTeams;
 
 function defaultState() {
   return {
     game: {
       status: "lobby",
-      totalPlayers: 0,
-      currentBoss: 1,
       phase: "lobby",
+      totalPlayers: 0,
+      teamCount: DEFAULT_TEAM_COUNT,
+      teamSize: DEFAULT_TEAM_SIZE,
+      currentBoss: 1,
       startedAt: null,
-      message: "等待主持人開始遊戲"
+      message: "等待主持人建立遊戲。"
     },
     teams: {},
     players: {},

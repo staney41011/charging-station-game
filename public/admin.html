@@ -8,31 +8,57 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body>
-  <main class="shell page">
-    <section class="card section">
+<body class="admin-body">
+  <main class="shell page admin-shell">
+    <section class="hero card admin-hero">
+      <p class="eyebrow">控制室</p>
       <h1>主持人後台</h1>
-      <p class="muted">建立遊戲、開始遊戲、手動補訂單、控制魔王、測試玩家狀態與資料。</p>
+      <p class="lede">建立隊伍、啟動遊戲、釋放魔王與現場測試都在這裡完成。穩定版保留在 GitHub 的 live-version，這裡可以放心測新版。</p>
     </section>
 
-    <section class="card section">
-      <h2>遊戲初始化</h2>
-      <div class="toolbar">
-        <label>
-          總人數
-          <input id="totalPlayers" type="number" min="1" value="30" />
-        </label>
-        <button id="bootstrapBtn">建立 6 組</button>
-        <button id="gameStartBtn">遊戲開始</button>
-        <button id="nextOrderBtn">下一張亂數訂單</button>
-        <button id="clearOrderBtn">清空目前訂單</button>
-        <button id="fullResetBtn">一鍵重置全部資料</button>
+    <section class="card section control-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Step 1</p>
+          <h2>建立本場遊戲</h2>
+        </div>
+        <div id="gameConfigSummary" class="status-chip">尚未建立</div>
       </div>
+
+      <div class="form-row">
+        <label>
+          開放組數
+          <input id="teamCount" type="number" min="1" max="15" value="15" />
+        </label>
+        <label>
+          每組人數
+          <input id="teamSize" type="number" min="1" max="99" value="4" />
+        </label>
+        <label>
+          預估總人數
+          <input id="totalPlayersPreview" type="number" readonly value="60" />
+        </label>
+      </div>
+
+      <div class="toolbar">
+        <button id="bootstrapBtn" class="primary-action">建立遊戲與組別</button>
+        <button id="gameStartBtn">遊戲開始</button>
+        <button id="fullResetBtn" class="danger-button">一鍵重置全部資料</button>
+      </div>
+      <p class="muted">建立遊戲會清空舊玩家、舊魔王、舊訂單與各組資料；請在正式開始前設定好組數與每組人數。</p>
     </section>
 
     <section class="card section">
-      <h2>魔王控制</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Mission</p>
+          <h2>訂單與魔王</h2>
+        </div>
+      </div>
+
       <div class="toolbar">
+        <button id="nextOrderBtn">發布下一張訂單</button>
+        <button id="clearOrderBtn">清空目前訂單</button>
         <button id="boss1Btn">開啟魔王 1</button>
         <button id="boss2Btn">開啟魔王 2</button>
         <button id="boss3Btn">開啟魔王 3</button>
@@ -42,7 +68,13 @@
     </section>
 
     <section class="card section">
-      <h2>自訂魔王</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Custom Boss</p>
+          <h2>自訂魔王</h2>
+        </div>
+      </div>
+
       <div class="form-row">
         <label>
           魔王名稱
@@ -53,66 +85,79 @@
           <input id="customBossHp" type="number" min="1" value="20" />
         </label>
       </div>
-      <div id="customBossMaterials" class="form-grid"></div>
+      <div id="customBossMaterials" class="form-grid material-grid"></div>
       <div class="toolbar">
         <button id="openCustomBossBtn">開啟自訂魔王</button>
       </div>
     </section>
 
     <section class="card section">
-      <h2>玩家狀態工具</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Live Tools</p>
+          <h2>現場控制</h2>
+        </div>
+      </div>
+
       <div class="toolbar">
-        <button id="randomDownBtn">隨機一位玩家沒電</button>
+        <button id="randomDownBtn">隨機一位正常玩家沒電</button>
         <button id="restoreDownBtn">恢復所有沒電玩家</button>
         <button id="clearPlayersBtn">清空舊玩家</button>
         <button id="releaseNumbersBtn">釋放玩家號碼</button>
+        <button id="clearTeamDataBtn">清空各組分數與庫存</button>
       </div>
     </section>
 
     <section class="card section">
-      <h2>測試工具</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Test Lab</p>
+          <h2>測試工具</h2>
+        </div>
+      </div>
+
       <div class="form-row">
         <label>
-          指定玩家代碼
-          <input id="targetPlayerCode" placeholder="A01 / B03 / C04" />
+          玩家代號
+          <input id="targetPlayerCode" placeholder="A01 / B03 / O04" />
         </label>
         <label>
           指定材料
-          <select id="carryMaterial">
-            <option value="wire">充電線</option>
-            <option value="outlet">插座</option>
-            <option value="wifi">無線網路</option>
-            <option value="fast_cable">快充線</option>
-            <option value="power_bank">行動電源</option>
-            <option value="reboot">重開機</option>
-            <option value="reminder">提醒卡</option>
-            <option value="companion">同行卡</option>
-            <option value="support">陪伴卡</option>
-          </select>
+          <select id="carryMaterial"></select>
         </label>
         <label>
-          加分組別
+          直接加分組別
           <select id="scoreTeam"></select>
         </label>
       </div>
 
       <div class="toolbar">
         <button id="createTestPlayersBtn">建立測試玩家</button>
-        <button id="setCarryBtn">給玩家材料</button>
-        <button id="clearCarryBtn">清空玩家材料</button>
+        <button id="setCarryBtn">給某玩家材料</button>
+        <button id="clearCarryBtn">清空某位玩家攜帶材料</button>
         <button id="setDownBtn">讓指定玩家沒電</button>
-        <button id="addScoreBtn">指定組別 +10 分</button>
-        <button id="clearTeamDataBtn">清空各組庫存與分數</button>
+        <button id="addScoreBtn">分數 +10</button>
       </div>
     </section>
 
     <section class="card section">
-      <h2>玩家列表</h2>
-      <div id="playerList" class="list"></div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Players</p>
+          <h2>玩家列表</h2>
+        </div>
+        <div id="playerCountBadge" class="status-chip">0 人</div>
+      </div>
+      <div id="playerList" class="list player-admin-list"></div>
     </section>
 
     <section class="card section">
-      <h2>操作紀錄</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Log</p>
+          <h2>操作紀錄</h2>
+        </div>
+      </div>
       <pre id="adminLog" class="log-box"></pre>
     </section>
   </main>

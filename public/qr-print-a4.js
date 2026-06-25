@@ -1,5 +1,4 @@
-const qrPages = [
-  { name: "玩家加入遊戲", payload: "player.html", note: "所有玩家一開始掃這個進入遊戲，選組別、代碼與暱稱。", kind: "url" },
+const materialsForPrint = [
   { name: "充電線", payload: "MATERIAL:wire", note: "拿取充電線材料。" },
   { name: "插座", payload: "MATERIAL:outlet", note: "拿取插座材料。" },
   { name: "無線網路", payload: "MATERIAL:wifi", note: "拿取無線網路材料。" },
@@ -8,14 +7,29 @@ const qrPages = [
   { name: "重開機", payload: "MATERIAL:reboot", note: "拿取重開機材料。" },
   { name: "提醒卡", payload: "MATERIAL:reminder", note: "拿取提醒卡材料。" },
   { name: "同行卡", payload: "MATERIAL:companion", note: "拿取同行卡材料。" },
-  { name: "陪伴卡", payload: "MATERIAL:support", note: "拿取陪伴卡材料。" },
-  { name: "第 1 組倉庫", payload: "WAREHOUSE:team1", note: "玩家帶著材料掃這張 QR，材料就送到第 1 組倉庫。" },
-  { name: "第 2 組倉庫", payload: "WAREHOUSE:team2", note: "玩家帶著材料掃這張 QR，材料就送到第 2 組倉庫。" },
-  { name: "第 3 組倉庫", payload: "WAREHOUSE:team3", note: "玩家帶著材料掃這張 QR，材料就送到第 3 組倉庫。" },
-  { name: "第 4 組倉庫", payload: "WAREHOUSE:team4", note: "玩家帶著材料掃這張 QR，材料就送到第 4 組倉庫。" },
-  { name: "第 5 組倉庫", payload: "WAREHOUSE:team5", note: "玩家帶著材料掃這張 QR，材料就送到第 5 組倉庫。" },
-  { name: "第 6 組倉庫", payload: "WAREHOUSE:team6", note: "玩家帶著材料掃這張 QR，材料就送到第 6 組倉庫。" },
-  { name: "中央電塔", payload: "BOSS:CENTRAL", note: "打魔王時，把材料送到中央電塔。" }
+  { name: "陪伴卡", payload: "MATERIAL:support", note: "拿取陪伴卡材料。" }
+];
+
+const warehousePages = Array.from({ length: 15 }, (_, index) => ({
+  name: `第 ${index + 1} 組倉庫`,
+  payload: `WAREHOUSE:team${index + 1}`,
+  note: "玩家帶著材料掃這張 QR，材料就送到這一組倉庫。"
+}));
+
+const qrPages = [
+  {
+    name: "玩家加入遊戲",
+    payload: "player.html",
+    note: "所有玩家一開始掃這張進入遊戲，選組別、玩家代碼與暱稱。",
+    kind: "url"
+  },
+  ...materialsForPrint,
+  ...warehousePages,
+  {
+    name: "中央電塔",
+    payload: "BOSS:CENTRAL",
+    note: "打魔王時，把需要的材料送到中央電塔。"
+  }
 ];
 
 function escapeHtml(value) {
@@ -23,7 +37,7 @@ function escapeHtml(value) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
 
@@ -39,10 +53,10 @@ function pageHtml(item, index) {
   return `
     <section class="qr-print-page" data-page="${index + 1}">
       <article class="qr-print-card">
-        <div class="qr-print-index">第 ${index + 1} / ${qrPages.length} 張</div>
+        <div class="qr-print-index">第 ${index + 1} / ${qrPages.length} 頁</div>
         <h2 class="qr-print-name">${escapeHtml(item.name)}</h2>
         <div class="qr-print-mount" data-payload="${escapeHtml(payload)}">
-          <div class="qr-fallback">二維碼產生中…</div>
+          <div class="qr-fallback">二維碼產生中</div>
         </div>
         <p class="qr-print-note">${escapeHtml(item.note)}</p>
         <p class="qr-print-payload">系統掃碼內容：${escapeHtml(payload)}</p>
@@ -81,8 +95,9 @@ function renderPages() {
 
   const QrCtor = resolveQrCtor();
   setStatus(!!QrCtor);
+
   if (!QrCtor) {
-    setError("二維碼產生器未載入，請檢查 vendor/qrcode.min.js 是否成功部署");
+    setError("二維碼產生失敗，請檢查 vendor/qrcode.min.js 是否載入。");
     console.error("QRCode 未載入，請檢查 vendor/qrcode.min.js 是否存在與 script 載入順序");
   }
 
@@ -102,9 +117,9 @@ function renderPages() {
         correctLevel: QrCtor.CorrectLevel?.M ?? 0
       });
     } catch (err) {
-      console.error("A4 二維碼產生失敗", payload, err);
+      console.error("正式列印 QR 產生失敗", payload, err);
       container.innerHTML = `<div class="qr-fallback">二維碼產生失敗<br><strong>${escapeHtml(payload)}</strong></div>`;
-      setError("部分二維碼產生失敗，請檢查 qrcode.min.js");
+      setError("部分二維碼產生失敗，請檢查 qrcode.min.js。");
     }
   });
 }
@@ -112,6 +127,5 @@ function renderPages() {
 document.addEventListener("DOMContentLoaded", () => {
   const printButton = document.getElementById("printPageBtn");
   if (printButton) printButton.addEventListener("click", () => window.print());
-  // 等一個 microtask，避免少數瀏覽器剛載入 vendor script 時全域變數尚未可讀。
   Promise.resolve().then(renderPages);
 });

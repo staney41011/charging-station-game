@@ -1,6 +1,8 @@
 const db = initFirebase();
 const scoreTeamSelect = $("#scoreTeam");
 
+let latestData = defaultState();
+
 function log(msg) {
   const logBox = $("#adminLog");
   if (!logBox) return;
@@ -21,23 +23,25 @@ function bossById(id) {
   };
 }
 
-function emptyTeams(totalPlayers) {
-  const teams = {};
+function readGameSetup() {
+  const teamCount = normalizeTeamCount($("#teamCount")?.value);
+  const teamSize = normalizeTeamSize($("#teamSize")?.value);
 
-  TEAM_LETTERS.forEach((letter, i) => {
-    teams[`team${i + 1}`] = {
-      name: `第 ${i + 1} 組`,
-      letter,
-      capacity: teamCapacity(totalPlayers, i),
-      score: 0,
-      supportPoints: 0,
-      bossContribution: 0,
-      completedOrders: 0,
-      inventory: {}
-    };
-  });
+  return {
+    teamCount,
+    teamSize,
+    totalPlayers: teamCount * teamSize
+  };
+}
 
-  return teams;
+function updateTotalPreview() {
+  const setup = readGameSetup();
+  const preview = $("#totalPlayersPreview");
+  if (preview) preview.value = setup.totalPlayers;
+}
+
+function emptyTeams(teamCount, teamSize) {
+  return makeTeams(teamCount, teamSize);
 }
 
 async function getData() {
@@ -49,28 +53,34 @@ async function updateGame(patch) {
   await db.ref("/game").update(patch);
 }
 
-async function bootstrap(totalPlayers) {
-  await db.ref("/").update({
+async function bootstrap() {
+  const setup = readGameSetup();
+
+  await db.ref("/").set({
     game: {
       status: "lobby",
-      totalPlayers,
+      totalPlayers: setup.totalPlayers,
+      teamCount: setup.teamCount,
+      teamSize: setup.teamSize,
       currentBoss: 1,
       phase: "lobby",
       startedAt: null,
-      message: "等待主持人開始遊戲"
+      message: `已建立 ${setup.teamCount} 組，每組 ${setup.teamSize} 人。等待主持人開始遊戲。`
     },
-    teams: emptyTeams(totalPlayers),
+    teams: emptyTeams(setup.teamCount, setup.teamSize),
     players: {},
     boss: null,
     order: null
   });
 
-  log(`已建立 ${totalPlayers} 人的 6 組資料，並清空目前訂單`);
+  log(`已建立 ${setup.teamCount} 組、每組 ${setup.teamSize} 人，共 ${setup.totalPlayers} 個名額，並清空舊資料。`);
 }
 
 async function startGame() {
-  if (typeof makeRandomOrder !== "function") {
-    log("錯誤：找不到 makeRandomOrder，請確認 app.js 已正確載入");
+  const data = await getData();
+
+  if (!Object.keys(data.teams || {}).length) {
+    log("請先建立遊戲與組別。");
     return;
   }
 
@@ -78,44 +88,40 @@ async function startGame() {
 
   await db.ref("/").update({
     game: {
+      ...(data.game || {}),
       status: "running",
       phase: "running",
       startedAt: Date.now(),
-      message: "遊戲開始！請各組店長查看第一張訂單。"
+      message: "遊戲開始！請各組店長查看第一張訂單，準備迎戰魔王。"
     },
     order: firstOrder
   });
 
-  log(`已開始遊戲，並產生第一張訂單：${firstOrder.name}`);
+  log(`遊戲開始，第一張訂單：${firstOrder.name}`);
 }
 
 async function nextRandomOrder() {
-  if (typeof makeRandomOrder !== "function") {
-    log("錯誤：找不到 makeRandomOrder，請確認 app.js 已正確載入");
-    return;
-  }
-
   const data = await getData();
   const previousDefId = data.order?.defId || null;
   const nextOrder = makeRandomOrder(previousDefId);
 
   await db.ref("/").update({
-    order: nextOrder
+    order: nextOrder,
+    game: {
+      ...(data.game || {}),
+      status: "running",
+      phase: "running",
+      message: "新訂單已發布，請各組店長查看店長頁。"
+    }
   });
 
-  await db.ref("/game").update({
-    status: "running",
-    phase: "running",
-    message: "新訂單已發布，請各組店長查看店長頁。"
-  });
-
-  log(`已手動產生下一張訂單：${nextOrder.name}`);
+  log(`已發布下一張訂單：${nextOrder.name}`);
 }
 
 async function clearOrder() {
   await db.ref("/order").set(null);
-  await db.ref("/game/message").set("目前訂單已清空，等待下一張訂單。");
-  log("已清空目前訂單");
+  await db.ref("/game/message").set("目前沒有訂單，請等待主持人發布下一張。");
+  log("已清空目前訂單。");
 }
 
 async function openBoss(id) {
@@ -125,7 +131,7 @@ async function openBoss(id) {
     currentBoss: Number(id.replace("boss", "")),
     phase: id,
     status: "running",
-    message: `${BOSS_DEFS[id].name} 已出現！`
+    message: `${BOSS_DEFS[id].name} 出現！請把需要的材料送到中央電塔。`
   });
 
   log(`已開啟 ${BOSS_DEFS[id].name}`);
@@ -135,8 +141,8 @@ async function openCustomBoss() {
   const name = String($("#customBossName").value || "").trim();
   const hp = Number($("#customBossHp").value || 0);
 
-  if (!name) return log("請輸入魔王名稱");
-  if (!Number.isInteger(hp) || hp < 1) return log("請輸入有效血量");
+  if (!name) return log("請輸入魔王名稱。");
+  if (!Number.isInteger(hp) || hp < 1) return log("請輸入有效血量。");
 
   const required = {};
   const delivered = {};
@@ -152,7 +158,7 @@ async function openCustomBoss() {
   });
 
   if (!Object.keys(required).length) {
-    return log("請至少設定一種需要的材料");
+    return log("請至少設定一種需要的材料。");
   }
 
   await db.ref("/boss").set({
@@ -169,7 +175,7 @@ async function openCustomBoss() {
     status: "running",
     phase: "custom",
     currentBoss: 0,
-    message: `自訂魔王 ${name} 已開啟`
+    message: `自訂魔王 ${name} 出現！請各組支援中央電塔。`
   });
 
   log(`已開啟自訂魔王：${name}`);
@@ -177,18 +183,19 @@ async function openCustomBoss() {
 
 async function clearPlayers() {
   await db.ref("/players").set({});
-  log("已清空舊玩家");
+  log("已清空舊玩家。");
 }
 
 async function clearBoss() {
   await db.ref("/boss").set(null);
-  log("已清空舊魔王");
+  await db.ref("/game/message").set("目前尚未出現魔王。");
+  log("已清空魔王。");
 }
 
 async function clearTeamData() {
   const data = await getData();
 
-  for (const [id] of Object.entries(data.teams || {})) {
+  for (const [id] of sortedTeamEntries(data.teams)) {
     await db.ref(`/teams/${id}`).update({
       score: 0,
       supportPoints: 0,
@@ -198,7 +205,7 @@ async function clearTeamData() {
     });
   }
 
-  log("已清空各組庫存、分數、支援點、魔王貢獻與完成訂單數");
+  log("已清空各組庫存、分數、支援點、魔王貢獻與完成訂單數。");
 }
 
 async function releaseNumbers() {
@@ -209,23 +216,23 @@ async function releaseNumbers() {
     await db.ref(`/players/${code}`).update({ number: nextNumber });
   }
 
-  log("已釋放玩家號碼");
+  log("已重新寫入玩家號碼。");
 }
 
 async function clearCarryForTarget() {
-  const code = String($("#targetPlayerCode").value || "").trim().toUpperCase();
+  const code = normalizeCode($("#targetPlayerCode").value);
 
-  if (!code) return log("請輸入指定玩家代碼");
+  if (!code) return log("請輸入玩家代號。");
 
   await db.ref(`/players/${code}/carrying`).set(null);
-  log(`已清空 ${code} 的攜帶材料`);
+  log(`已清空 ${code} 攜帶材料。`);
 }
 
 async function randomDown() {
   const data = await getData();
   const players = Object.values(data.players || {}).filter(p => p.status === "normal");
 
-  if (!players.length) return log("沒有可沒電的正常玩家");
+  if (!players.length) return log("沒有可沒電的正常玩家。");
 
   const picked = players[Math.floor(Math.random() * players.length)];
 
@@ -235,9 +242,9 @@ async function randomDown() {
     rescuedBy: {}
   });
 
-  await db.ref("/game/message").set(`${picked.code} 沒電了，需要 5 位玩家救援`);
+  await db.ref("/game/message").set(`${picked.code} 沒電了！需要 5 位不同玩家救援。`);
 
-  log(`已讓 ${picked.code} 沒電`);
+  log(`${picked.code} 已設為沒電。`);
 }
 
 async function restoreAllDown() {
@@ -252,25 +259,36 @@ async function restoreAllDown() {
     });
   }
 
-  await db.ref("/game/message").set("所有沒電玩家已恢復行動");
+  await db.ref("/game/message").set("所有沒電玩家已恢復行動。");
 
-  log("已恢復所有沒電玩家");
+  log("已恢復所有沒電玩家。");
 }
 
 async function fullReset() {
   await db.ref("/").set(defaultState());
-  log("已一鍵重置全部資料");
+  log("已重置全部資料。");
 }
 
 async function createTestPlayers() {
-  for (const letter of TEAM_LETTERS) {
-    for (let i = 1; i <= 2; i++) {
+  const data = await getData();
+  const teams = sortedTeamEntries(data.teams);
+
+  if (!teams.length) {
+    log("請先建立遊戲與組別。");
+    return;
+  }
+
+  for (const [teamId, team] of teams) {
+    const letter = team.letter || teamLetter(teamId);
+    const count = Math.min(2, Number(team.capacity || 2));
+
+    for (let i = 1; i <= count; i++) {
       const code = `${letter}${String(i).padStart(2, "0")}`;
 
       await db.ref(`/players/${code}`).set({
         code,
         nickname: `${code}測試`,
-        teamId: `team${TEAM_LETTERS.indexOf(letter) + 1}`,
+        teamId,
         number: i,
         status: "normal",
         carrying: null,
@@ -281,14 +299,14 @@ async function createTestPlayers() {
     }
   }
 
-  log("已建立每組 2 位測試玩家");
+  log("已為每個開放組別建立最多 2 位測試玩家。");
 }
 
 async function giveCarry() {
-  const code = String($("#targetPlayerCode").value || "").trim().toUpperCase();
+  const code = normalizeCode($("#targetPlayerCode").value);
   const material = String($("#carryMaterial").value || "").trim();
 
-  if (!code || !material) return log("請輸入玩家代碼與材料");
+  if (!code || !material) return log("請輸入玩家代號並選擇材料。");
 
   const snap = await db.ref(`/players/${code}`).get();
   const player = snap.val();
@@ -296,13 +314,13 @@ async function giveCarry() {
   if (!player) return log(`找不到玩家：${code}`);
 
   await db.ref(`/players/${code}/carrying`).set(material);
-  log(`已給 ${code} 材料 ${materialLabel(material)}`);
+  log(`已給 ${code} 材料：${materialLabel(material)}`);
 }
 
 async function setDown() {
-  const code = String($("#targetPlayerCode").value || "").trim().toUpperCase();
+  const code = normalizeCode($("#targetPlayerCode").value);
 
-  if (!code) return log("請輸入玩家代碼");
+  if (!code) return log("請輸入玩家代號。");
 
   const snap = await db.ref(`/players/${code}`).get();
   const player = snap.val();
@@ -315,16 +333,18 @@ async function setDown() {
     rescuedBy: {}
   });
 
-  await db.ref("/game/message").set(`${code} 沒電了，需要 5 位玩家救援`);
+  await db.ref("/game/message").set(`${code} 沒電了！需要 5 位不同玩家救援。`);
 
-  log(`已讓 ${code} 沒電`);
+  log(`${code} 已設為沒電。`);
 }
 
 async function addScore() {
   const teamId = scoreTeamSelect.value;
 
+  if (!teamId) return log("請先選擇組別。");
+
   await db.ref(`/teams/${teamId}/score`).transaction(v => (v || 0) + 10);
-  log(`${teamId} 分數 +10`);
+  log(`${teamDisplayName(teamId, latestData.teams?.[teamId])} 分數 +10。`);
 }
 
 function bind(btnId, fn) {
@@ -343,19 +363,28 @@ function bind(btnId, fn) {
   });
 }
 
-function initScoreTeamOptions() {
+function initMaterialOptions() {
+  const carryMaterial = $("#carryMaterial");
+  if (!carryMaterial) return;
+
+  carryMaterial.innerHTML = MATERIALS.map(material => `
+    <option value="${material}">${materialLabel(material)}</option>
+  `).join("");
+}
+
+function renderScoreTeamOptions(data) {
   if (!scoreTeamSelect) return;
 
-  scoreTeamSelect.innerHTML = "";
+  const current = scoreTeamSelect.value;
+  const teams = sortedTeamEntries(data.teams);
 
-  TEAM_LETTERS.forEach((letter, i) => {
-    const opt = document.createElement("option");
+  scoreTeamSelect.innerHTML = teams.map(([id, team]) => `
+    <option value="${id}">${teamDisplayName(id, team)} (${team.letter || teamLetter(id)})</option>
+  `).join("");
 
-    opt.value = `team${i + 1}`;
-    opt.textContent = `第 ${i + 1} 組 (${letter})`;
-
-    scoreTeamSelect.appendChild(opt);
-  });
+  if (current && data.teams?.[current]) {
+    scoreTeamSelect.value = current;
+  }
 }
 
 function initCustomBossInputs() {
@@ -371,13 +400,15 @@ function initCustomBossInputs() {
   `).join("");
 }
 
-function renderPlayers(players) {
+function renderPlayers(players, data) {
   const playerList = $("#playerList");
+  const countBadge = $("#playerCountBadge");
 
+  if (countBadge) countBadge.textContent = `${players.length} 人`;
   if (!playerList) return;
 
   if (!players.length) {
-    playerList.innerHTML = `<div class="row"><span class="muted">目前沒有玩家</span></div>`;
+    playerList.innerHTML = `<div class="row"><span class="muted">目前沒有玩家。</span></div>`;
     return;
   }
 
@@ -385,12 +416,13 @@ function renderPlayers(players) {
     .sort((a, b) => String(a.code).localeCompare(String(b.code)))
     .map(p => {
       const carry = p.carrying ? materialLabel(p.carrying) : "無";
+      const teamName = teamDisplayName(p.teamId, data.teams?.[p.teamId]);
 
       return `
-        <div class="row">
-          <span><strong>${p.code}</strong> ${p.nickname || ""} · ${p.teamId || "-"}</span>
-          <span class="pill ${p.status === "down" ? "danger" : ""}">
-            ${p.status === "down" ? "沒電" : "正常"}${p.status === "normal" ? ` · ${carry}` : ""}
+        <div class="row admin-player-row">
+          <span><strong>${p.code}</strong> ${p.nickname || ""} · ${teamName}</span>
+          <span class="pill ${p.status === "down" ? "danger-pill" : ""}">
+            ${p.status === "down" ? "沒電" : `正常 · ${carry}`}
           </span>
         </div>
       `;
@@ -398,11 +430,28 @@ function renderPlayers(players) {
     .join("");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initScoreTeamOptions();
-  initCustomBossInputs();
+function renderGameConfig(data) {
+  const game = data.game || {};
+  const teamCount = Object.keys(data.teams || {}).length || Number(game.teamCount || 0);
+  const teamSize = Number(game.teamSize || 0);
+  const summary = $("#gameConfigSummary");
 
-  bind("bootstrapBtn", () => bootstrap(Number($("#totalPlayers").value || 0) || 30));
+  if (summary) {
+    summary.textContent = teamCount
+      ? `${teamCount} 組 · 每組 ${teamSize || "-"} 人`
+      : "尚未建立";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initMaterialOptions();
+  initCustomBossInputs();
+  updateTotalPreview();
+
+  $("#teamCount")?.addEventListener("input", updateTotalPreview);
+  $("#teamSize")?.addEventListener("input", updateTotalPreview);
+
+  bind("bootstrapBtn", bootstrap);
   bind("gameStartBtn", startGame);
   bind("nextOrderBtn", nextRandomOrder);
   bind("clearOrderBtn", clearOrder);
@@ -427,7 +476,10 @@ document.addEventListener("DOMContentLoaded", () => {
   bind("setDownBtn", setDown);
   bind("addScoreBtn", addScore);
 
-  db.ref("/players").on("value", snap => {
-    renderPlayers(Object.values(snap.val() || {}));
+  db.ref("/").on("value", snap => {
+    latestData = snap.val() || defaultState();
+    renderScoreTeamOptions(latestData);
+    renderPlayers(Object.values(latestData.players || {}), latestData);
+    renderGameConfig(latestData);
   });
 });

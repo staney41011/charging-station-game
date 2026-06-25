@@ -8,52 +8,81 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body>
-  <main class="shell page">
-    <section class="card section">
-      <h1>店長頁</h1>
-      <p class="muted">可查看本組資訊、目前訂單、庫存狀態，並在材料足夠時交付訂單。</p>
-      <div class="toolbar">
+<body class="team-body">
+  <main class="shell page team-shell">
+    <section class="hero card team-hero">
+      <div>
+        <p class="eyebrow">店長指揮台</p>
+        <h1 id="teamName">請選擇組別</h1>
+        <p class="lede">看庫存、派人跑材料、送出求援，決定這一組怎麼分工。</p>
+      </div>
+      <div class="team-controls">
         <label>
-          選擇組別
+          指揮組別
           <select id="teamSelect"></select>
         </label>
         <label>
-          求援材料
+          急缺材料
           <select id="helpMaterial"></select>
         </label>
-        <button id="requestHelpBtn">發出求援</button>
+        <button id="requestHelpBtn" class="primary-action">發出求援</button>
       </div>
     </section>
 
-    <section class="card section">
-      <h2 id="teamName">-</h2>
-      <div id="teamStats" class="stat-grid"></div>
+    <section id="teamStats" class="stat-grid"></section>
+
+    <section class="team-main-grid">
+      <section class="card section focus-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Order</p>
+            <h2>目前訂單</h2>
+          </div>
+        </div>
+        <div id="orderBox" class="list"></div>
+      </section>
+
+      <section class="card section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Boss</p>
+            <h2>魔王需求</h2>
+          </div>
+        </div>
+        <div id="bossNeed" class="list"></div>
+      </section>
+    </section>
+
+    <section class="team-main-grid">
+      <section class="card section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Members</p>
+            <h2>組員狀態</h2>
+          </div>
+        </div>
+        <div id="memberList" class="list"></div>
+      </section>
+
+      <section class="card section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Stock</p>
+            <h2>本組庫存</h2>
+          </div>
+        </div>
+        <div id="inventoryList" class="inventory-grid"></div>
+      </section>
     </section>
 
     <section class="card section">
-      <h2>目前訂單</h2>
-      <div id="orderBox" class="list"></div>
-    </section>
-
-    <section class="card section">
-      <h2>組員列表</h2>
-      <div id="memberList" class="list"></div>
-    </section>
-
-    <section class="card section">
-      <h2>本組庫存</h2>
-      <div id="inventoryList" class="list"></div>
-    </section>
-
-    <section class="card section">
-      <h2>魔王需求</h2>
-      <div id="bossNeed" class="row"></div>
-    </section>
-
-    <section class="card section">
-      <h2>全場訊息</h2>
-      <div id="messageText" class="row"></div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Broadcast</p>
+          <h2>全場訊息</h2>
+        </div>
+      </div>
+      <div id="messageText" class="message-strip">等待主持人訊息。</div>
     </section>
   </main>
 

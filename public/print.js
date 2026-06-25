@@ -21,6 +21,7 @@ function qrLibraryLoaded() {
 
 function setPrintError(message) {
   const errorBox = $("#printError");
+  if (!errorBox) return;
   errorBox.hidden = false;
   errorBox.querySelector(".print-error").textContent = message;
 }
@@ -40,7 +41,7 @@ for (const payload of items) {
   const mount = document.getElementById(`qr-${slug(payload)}`);
   try {
     const QrCtor = resolveQrCtor();
-    if (!QrCtor) throw new Error("QR code library missing");
+    if (!QrCtor) throw new Error("QRCode library missing");
     new QrCtor(mount, {
       text: payload,
       width: 180,
@@ -50,11 +51,11 @@ for (const payload of items) {
   } catch (err) {
     hadFailure = true;
     console.error("QR 產生失敗", payload, err);
-    mount.innerHTML = `<div class="qr-fallback">系統掃碼內容：<strong>${payload}</strong></div>`;
+    mount.innerHTML = `<div class="qr-fallback">二維碼產生失敗<br><strong>${payload}</strong></div>`;
   }
 }
 
 if (hadFailure) {
-  setPrintError("二維碼產生失敗，請檢查 public/vendor/qrcode.min.js 是否存在");
+  setPrintError("二維碼產生失敗，請檢查 public/vendor/qrcode.min.js 是否存在。");
   console.error("QR generation failed for one or more payloads");
 }

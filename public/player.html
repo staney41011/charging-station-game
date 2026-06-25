@@ -5,215 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>玩家入口</title>
   <link rel="stylesheet" href="style.css" />
-
-  <style>
-    #scannerSection[hidden] {
-      display: none !important;
-    }
-
-    #scannerSection:not([hidden]) {
-      display: block !important;
-    }
-
-    #qr-reader {
-      width: 100%;
-      max-width: 420px;
-      min-height: 320px;
-      margin: 16px auto;
-      background: #f2f2f2;
-      border: 3px solid #333;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    #qr-reader video {
-      width: 100% !important;
-      height: auto !important;
-      display: block !important;
-    }
-
-    #qr-reader__scan_region,
-    #qr-reader__dashboard {
-      color: #111 !important;
-    }
-
-    .rescue-qr-card {
-      background: #ffffff;
-      color: #000000;
-      border-radius: 20px;
-      padding: 20px;
-      margin: 16px auto;
-      width: min(96vw, 420px);
-      text-align: center;
-      border: 4px solid #111111;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    }
-
-    .rescue-qr-title {
-      font-size: 1.2rem;
-      font-weight: 900;
-      margin-bottom: 10px;
-    }
-
-    .rescue-qr-code {
-      font-size: 2.4rem;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      margin-top: 12px;
-    }
-
-    .rescue-qr-card canvas,
-    .rescue-qr-card img {
-      width: 320px !important;
-      height: 320px !important;
-      max-width: 86vw !important;
-      max-height: 86vw !important;
-      background: #ffffff !important;
-      padding: 8px;
-    }
-
-    .down-title {
-      font-size: 2rem;
-      font-weight: 900;
-    }
-
-    .down-progress {
-      font-size: 3rem;
-      font-weight: 900;
-      margin: 12px 0;
-    }
-  </style>
 </head>
 
 <body class="player-body">
   <main class="shell page player-shell">
-    <section class="card section player-header">
-      <div class="player-topline">
-        <div>
-          <p class="eyebrow">玩家入口</p>
-          <h1 id="playerTitle">請先加入遊戲</h1>
-          <p class="muted" id="playerSubtitle">等待主持人開始遊戲，請先完成加入。</p>
-        </div>
-        <div class="player-status-badge" id="playerStatusBadge">尚未加入</div>
+    <section class="card player-identity-card">
+      <div class="player-identity-main">
+        <p class="eyebrow">玩家操作台</p>
+        <h1 id="playerTitle">請先加入遊戲</h1>
+        <p id="playerSubtitle" class="lede">選擇組別、玩家代碼與暱稱後，就可以開始掃描現場二維碼。</p>
       </div>
+      <div id="playerStatusBadge" class="player-status-badge">尚未加入</div>
 
       <div class="player-summary">
-        <div class="summary-item">
-          <span class="muted">玩家代碼</span>
-          <strong id="summaryCode">-</strong>
-        </div>
-        <div class="summary-item">
-          <span class="muted">暱稱</span>
-          <strong id="summaryNickname">-</strong>
-        </div>
-        <div class="summary-item">
-          <span class="muted">組別</span>
-          <strong id="summaryTeam">-</strong>
-        </div>
-        <div class="summary-item">
-          <span class="muted">狀態</span>
-          <strong id="summaryStatus">-</strong>
-        </div>
-        <div class="summary-item">
-          <span class="muted">目前攜帶</span>
-          <strong id="summaryCarry">-</strong>
-        </div>
+        <div class="summary-item"><span>玩家代碼</span><strong id="summaryCode">-</strong></div>
+        <div class="summary-item"><span>暱稱</span><strong id="summaryNickname">-</strong></div>
+        <div class="summary-item"><span>組別</span><strong id="summaryTeam">-</strong></div>
+        <div class="summary-item"><span>狀態</span><strong id="summaryStatus">-</strong></div>
+        <div class="summary-item carry-summary"><span>目前攜帶</span><strong id="summaryCarry">-</strong></div>
       </div>
     </section>
 
-    <section class="card section">
-      <h2>第一次加入遊戲</h2>
-      <div class="form-row">
-        <label>
-          組別
-          <select id="team"></select>
-        </label>
+    <section class="player-setup-grid">
+      <section class="card section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">第一次</p>
+            <h2>加入遊戲</h2>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>
+            選組別
+            <select id="team"></select>
+          </label>
+          <label>
+            選玩家代碼
+            <select id="code"></select>
+          </label>
+          <label>
+            暱稱
+            <input id="nickname" placeholder="輸入暱稱" />
+          </label>
+        </div>
+        <div class="toolbar">
+          <button type="button" id="joinBtn" class="primary-action">加入遊戲</button>
+          <button type="button" id="refreshBtn">重新載入名單</button>
+        </div>
+        <div id="joinPreview" class="soft-note">請先等待主持人建立組別。</div>
+      </section>
 
-        <label>
-          玩家代碼
-          <select id="code"></select>
-        </label>
-
-        <label>
-          暱稱
-          <input id="nickname" placeholder="輸入暱稱" />
-        </label>
-      </div>
-
-      <div class="toolbar">
-        <button type="button" id="joinBtn">加入遊戲</button>
-        <button type="button" id="refreshBtn">重新載入名單</button>
-      </div>
-
-      <div id="joinPreview" class="result-banner" style="margin-top:12px;">
-        請先選擇組別與玩家代碼
-      </div>
-    </section>
-
-    <section class="card section">
-      <h2>回到遊戲</h2>
-      <div class="form-row">
+      <section class="card section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">回來</p>
+            <h2>回到遊戲</h2>
+          </div>
+        </div>
         <label>
           玩家代號
-          <input id="returnCode" placeholder="A01 / B03 / C04" />
+          <input id="returnCode" placeholder="例如 A01 / B03 / O04" />
         </label>
-      </div>
-
-      <div class="toolbar">
-        <button type="button" id="lookupReturnBtn">查詢玩家代號</button>
-        <button type="button" id="confirmReturnBtn" hidden>確認回到遊戲</button>
-      </div>
-
-      <div id="returnConfirm" class="result-banner" style="margin-top:12px;" hidden></div>
+        <div class="toolbar">
+          <button type="button" id="lookupReturnBtn">查詢玩家</button>
+          <button type="button" id="confirmReturnBtn" hidden>確認回到遊戲</button>
+        </div>
+        <div id="returnConfirm" class="soft-note" hidden></div>
+      </section>
     </section>
 
     <section class="card section player-action-card" id="activeActionCard">
-      <h2 id="actionHeading">現場操作</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">現在要做</p>
+          <h2 id="actionHeading">現場操作</h2>
+        </div>
+      </div>
 
-      <button type="button" id="scanQrBtn" class="primary-btn">掃描二維碼</button>
-      <button type="button" id="testCameraBtn" class="primary-btn no-print" style="margin-top:12px;">測試相機</button>
+      <button type="button" id="scanQrBtn" class="scan-button">掃描二維碼</button>
+      <button type="button" id="testCameraBtn" class="ghost-button">測試相機</button>
 
-      <p class="muted action-hint">
-        掃不到時才使用手動輸入，正常玩法仍以跑到材料站掃 QR 為主。
-      </p>
+      <p class="action-hint">正常玩法是跑到材料站、倉庫、中央電塔或沒電玩家旁邊掃 QR。掃不到時才使用手動輸入。</p>
 
-      <label class="manual-entry">
-        手動輸入 QR 代碼
-        <textarea id="payload" placeholder="MATERIAL:wire / WAREHOUSE:team1 / BOSS:CENTRAL / RESCUE:C04"></textarea>
-      </label>
-
-      <div class="toolbar">
+      <details class="manual-details">
+        <summary>掃不到時手動輸入</summary>
+        <label class="manual-entry">
+          QR 代碼
+          <textarea id="payload" placeholder="MATERIAL:wire / WAREHOUSE:team1 / BOSS:CENTRAL / RESCUE:C04"></textarea>
+        </label>
         <button type="button" id="applyPayloadBtn">送出掃碼內容</button>
-      </div>
+      </details>
     </section>
 
-    <section class="card section" id="scannerSection" hidden>
-      <h2>掃描器</h2>
+    <section class="card section scanner-card" id="scannerSection" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Camera</p>
+          <h2>掃描器</h2>
+        </div>
+        <button type="button" id="stopScannerBtn" class="ghost-button compact-button">停止掃描</button>
+      </div>
       <div id="qr-reader"></div>
-      <p class="muted">相機開啟後，請將二維碼放在框線中央。</p>
-      <div class="toolbar">
-        <button type="button" id="stopScannerBtn">停止掃描</button>
-      </div>
+      <p class="muted center-text">相機開啟後，請把二維碼放在框線中央。</p>
     </section>
 
-    <section class="card section" id="downSection" hidden>
+    <section class="card section down-card" id="downSection" hidden>
+      <p class="eyebrow danger-text">需要救援</p>
       <h2 class="down-title">你沒電了</h2>
       <div class="down-progress" id="downProgress">0 / 5</div>
-      <p class="down-note">請讓 5 位不同玩家掃你的 QR，你才會恢復行動。</p>
-
-      <div class="down-qr-wrap">
-        <div id="downQr"></div>
-      </div>
-
-      <p class="muted">系統掃碼內容：<strong id="downQrText">RESCUE:----</strong></p>
+      <p class="down-note">請讓 5 位不同玩家掃你的救援 QR，你才會恢復行動。</p>
+      <div class="down-qr-wrap"><div id="downQr"></div></div>
+      <p class="qr-text">系統掃碼內容：<strong id="downQrText">RESCUE:----</strong></p>
     </section>
 
-    <section class="card section">
+    <section class="card section result-card">
+      <p class="eyebrow">Result</p>
       <h2>操作結果</h2>
       <div id="resultBanner" class="result-banner">等待加入遊戲</div>
-      <div id="playerCard" class="player-card">
-        <span class="muted">尚未加入玩家</span>
-      </div>
+      <div id="playerCard" class="player-card"><span class="muted">尚未加入玩家</span></div>
     </section>
   </main>
 
