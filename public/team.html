@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>店長頁</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <main class="shell page">
+    <section class="card section">
+      <h1>店長頁</h1>
+      <p class="muted">可查看本組資訊、目前訂單、庫存狀態，並在材料足夠時交付訂單。</p>
+      <div class="toolbar">
+        <label>
+          選擇組別
+          <select id="teamSelect"></select>
+        </label>
+        <label>
+          求援材料
+          <select id="helpMaterial"></select>
+        </label>
+        <button id="requestHelpBtn">發出求援</button>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2 id="teamName">-</h2>
+      <div id="teamStats" class="stat-grid"></div>
+    </section>
+
+    <section class="card section">
+      <h2>目前訂單</h2>
+      <div id="orderBox" class="list"></div>
+    </section>
+
+    <section class="card section">
+      <h2>組員列表</h2>
+      <div id="memberList" class="list"></div>
+    </section>
+
+    <section class="card section">
+      <h2>本組庫存</h2>
+      <div id="inventoryList" class="list"></div>
+    </section>
+
+    <section class="card section">
+      <h2>魔王需求</h2>
+      <div id="bossNeed" class="row"></div>
+    </section>
+
+    <section class="card section">
+      <h2>全場訊息</h2>
+      <div id="messageText" class="row"></div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+  <script src="./app.js"></script>
+  <script src="./team.js"></script>
+</body>
+</html>

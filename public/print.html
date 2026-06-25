@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>二維碼測試頁</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="shell page">
+    <section class="card section no-print">
+      <h1>二維碼測試頁</h1>
+      <p class="muted">這個頁面用來檢查二維碼產生器是否正常。</p>
+    </section>
+    <section id="printError" class="card section" hidden>
+      <div class="print-error">二維碼產生失敗，請檢查 public/vendor/qrcode.min.js 是否存在</div>
+    </section>
+    <section class="card section no-print">
+      <div class="muted">二維碼產生器狀態：<strong id="qrLibraryStatus">未載入</strong></div>
+    </section>
+    <section class="card section">
+      <div id="printList" class="list"></div>
+    </section>
+  </main>
+  <script src="./vendor/qrcode.min.js"></script>
+  <script src="./app.js"></script>
+  <script src="./print.js"></script>
+</body>
+</html>

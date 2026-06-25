@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>投影幕畫面</title>
+  <link rel="stylesheet" href="./style.css" />
+
+  <style>
+    body.display-body {
+      background:
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.22), transparent 30%),
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 28%),
+        #07111f;
+      color: #f8fafc;
+    }
+
+    .display-shell {
+      width: min(1380px, calc(100% - 32px));
+      padding: 20px 0 40px;
+    }
+
+    .display-hero {
+      text-align: center;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+    }
+
+    .display-hero h1 {
+      font-size: clamp(2.4rem, 5vw, 5.2rem);
+      line-height: 1.05;
+      margin: 0;
+    }
+
+    .display-hero .muted {
+      font-size: clamp(1.1rem, 2vw, 1.6rem);
+    }
+
+    .projector-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .projector-card {
+      background: rgba(15, 23, 42, 0.88);
+      border: 2px solid rgba(255,255,255,0.16);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.32);
+      min-height: 160px;
+    }
+
+    .projector-label {
+      color: #93c5fd;
+      font-size: clamp(1rem, 1.5vw, 1.4rem);
+      font-weight: 900;
+      letter-spacing: .12em;
+      margin-bottom: 8px;
+    }
+
+    .projector-title {
+      font-size: clamp(2rem, 4vw, 4rem);
+      line-height: 1.08;
+      font-weight: 1000;
+      margin: 0;
+    }
+
+    .projector-subtitle {
+      color: #cbd5e1;
+      font-size: clamp(1.1rem, 2vw, 1.7rem);
+      margin-top: 10px;
+      font-weight: 700;
+    }
+
+    .highlight-order {
+      border-color: rgba(251, 191, 36, 0.55);
+      background:
+        linear-gradient(135deg, rgba(251,191,36,0.20), rgba(15,23,42,0.92) 45%),
+        rgba(15, 23, 42, 0.9);
+    }
+
+    .highlight-danger {
+      border-color: rgba(251, 113, 133, 0.55);
+      background:
+        linear-gradient(135deg, rgba(251,113,133,0.18), rgba(15,23,42,0.92) 45%),
+        rgba(15, 23, 42, 0.9);
+    }
+
+    .rank-section {
+      margin-top: 18px;
+    }
+
+    .rank-grid-projector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .team-rank-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid rgba(255,255,255,0.14);
+      border-radius: 24px;
+      padding: 18px;
+    }
+
+    .team-rank-card.top {
+      border-color: rgba(251, 191, 36, 0.75);
+      background:
+        linear-gradient(135deg, rgba(251,191,36,0.22), rgba(15,23,42,0.94) 45%);
+    }
+
+    .team-rank-title {
+      font-size: clamp(1.3rem, 2.4vw, 2.4rem);
+      font-weight: 1000;
+      margin-bottom: 8px;
+    }
+
+    .team-score {
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 1000;
+      line-height: 1;
+      color: #fbbf24;
+    }
+
+    .team-meta {
+      margin-top: 10px;
+      color: #cbd5e1;
+      font-size: clamp(1rem, 1.6vw, 1.35rem);
+      font-weight: 700;
+    }
+
+    .order-progress-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .order-progress-team {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .order-progress-team strong {
+      font-size: clamp(1.1rem, 1.9vw, 1.7rem);
+      display: block;
+    }
+
+    .order-progress-team span {
+      color: #fbbf24;
+      font-weight: 1000;
+      font-size: clamp(1.2rem, 2vw, 1.9rem);
+    }
+
+    .down-list-projector {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .down-player-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      background: rgba(251, 113, 133, 0.12);
+      border: 1px solid rgba(251, 113, 133, 0.38);
+      border-radius: 18px;
+      padding: 12px 14px;
+      font-size: clamp(1.1rem, 1.8vw, 1.55rem);
+      font-weight: 900;
+    }
+
+    .empty-note {
+      color: #cbd5e1;
+      font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .projector-grid,
+      .rank-grid-projector,
+      .order-progress-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body class="display-body">
+  <main class="shell page display-shell">
+    <section class="display-hero card section">
+      <h1>充電站營業中</h1>
+      <p class="muted">全場狀態｜訂單進度｜排行榜｜救援提醒</p>
+    </section>
+
+    <section id="displayGrid" class="projector-grid"></section>
+
+    <section class="projector-card highlight-order" style="margin-top:18px;">
+      <div class="projector-label">目前訂單</div>
+      <div id="orderPanel"></div>
+    </section>
+
+    <section class="projector-card" style="margin-top:18px;">
+      <div class="projector-label">魔王資訊</div>
+      <div id="bossPanel"></div>
+    </section>
+
+    <section class="projector-card rank-section">
+      <div class="projector-label">各組排行榜</div>
+      <div id="rankGrid" class="rank-grid-projector"></div>
+    </section>
+
+    <section class="projector-card highlight-danger" style="margin-top:18px;">
+      <div class="projector-label">沒電玩家</div>
+      <div id="downList"></div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+  <script src="./app.js"></script>
+  <script src="./display.js"></script>
+</body>
+</html>

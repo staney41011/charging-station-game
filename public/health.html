@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>系統檢查頁</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="shell page">
+    <section class="card section">
+      <h1>系統檢查頁</h1>
+      <p class="muted">部署後先開這頁，確認本地檔案與 Firebase 是否正常載入。</p>
+    </section>
+    <section class="card section">
+      <div id="healthList" class="list"></div>
+    </section>
+  </main>
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="vendor/html5-qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+  <script src="health.js"></script>
+</body>
+</html>

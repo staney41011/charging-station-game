@@ -1,0 +1,8 @@
+{
+  "name": "overcooked-firebase-mvp",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx serve public"
+  }
+}

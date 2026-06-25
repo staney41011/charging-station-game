@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>主持人後台</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <main class="shell page">
+    <section class="card section">
+      <h1>主持人後台</h1>
+      <p class="muted">建立遊戲、開始遊戲、手動補訂單、控制魔王、測試玩家狀態與資料。</p>
+    </section>
+
+    <section class="card section">
+      <h2>遊戲初始化</h2>
+      <div class="toolbar">
+        <label>
+          總人數
+          <input id="totalPlayers" type="number" min="1" value="30" />
+        </label>
+        <button id="bootstrapBtn">建立 6 組</button>
+        <button id="gameStartBtn">遊戲開始</button>
+        <button id="nextOrderBtn">下一張亂數訂單</button>
+        <button id="clearOrderBtn">清空目前訂單</button>
+        <button id="fullResetBtn">一鍵重置全部資料</button>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>魔王控制</h2>
+      <div class="toolbar">
+        <button id="boss1Btn">開啟魔王 1</button>
+        <button id="boss2Btn">開啟魔王 2</button>
+        <button id="boss3Btn">開啟魔王 3</button>
+        <button id="boss4Btn">開啟魔王 4</button>
+        <button id="clearBossBtn">清空魔王</button>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>自訂魔王</h2>
+      <div class="form-row">
+        <label>
+          魔王名稱
+          <input id="customBossName" placeholder="例如：手機成癮獸" />
+        </label>
+        <label>
+          魔王血量
+          <input id="customBossHp" type="number" min="1" value="20" />
+        </label>
+      </div>
+      <div id="customBossMaterials" class="form-grid"></div>
+      <div class="toolbar">
+        <button id="openCustomBossBtn">開啟自訂魔王</button>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>玩家狀態工具</h2>
+      <div class="toolbar">
+        <button id="randomDownBtn">隨機一位玩家沒電</button>
+        <button id="restoreDownBtn">恢復所有沒電玩家</button>
+        <button id="clearPlayersBtn">清空舊玩家</button>
+        <button id="releaseNumbersBtn">釋放玩家號碼</button>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>測試工具</h2>
+      <div class="form-row">
+        <label>
+          指定玩家代碼
+          <input id="targetPlayerCode" placeholder="A01 / B03 / C04" />
+        </label>
+        <label>
+          指定材料
+          <select id="carryMaterial">
+            <option value="wire">充電線</option>
+            <option value="outlet">插座</option>
+            <option value="wifi">無線網路</option>
+            <option value="fast_cable">快充線</option>
+            <option value="power_bank">行動電源</option>
+            <option value="reboot">重開機</option>
+            <option value="reminder">提醒卡</option>
+            <option value="companion">同行卡</option>
+            <option value="support">陪伴卡</option>
+          </select>
+        </label>
+        <label>
+          加分組別
+          <select id="scoreTeam"></select>
+        </label>
+      </div>
+
+      <div class="toolbar">
+        <button id="createTestPlayersBtn">建立測試玩家</button>
+        <button id="setCarryBtn">給玩家材料</button>
+        <button id="clearCarryBtn">清空玩家材料</button>
+        <button id="setDownBtn">讓指定玩家沒電</button>
+        <button id="addScoreBtn">指定組別 +10 分</button>
+        <button id="clearTeamDataBtn">清空各組庫存與分數</button>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>玩家列表</h2>
+      <div id="playerList" class="list"></div>
+    </section>
+
+    <section class="card section">
+      <h2>操作紀錄</h2>
+      <pre id="adminLog" class="log-box"></pre>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+  <script src="./app.js"></script>
+  <script src="./admin.js"></script>
+</body>
+</html>
