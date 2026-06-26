@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>遊戲規則</title>
-  <link rel="stylesheet" href="style.css?v=dev15-20260625-2" />
+  <link rel="stylesheet" href="style.css?v=dev15-20260627-1" />
 </head>
 <body>
   <main class="shell page">
@@ -74,6 +74,22 @@
         玩家請使用 Chrome 或 Safari 開啟，不建議使用 LINE、Facebook、Instagram 內建瀏覽器。第一次掃描時請允許相機權限；如果掃不到，才使用手動輸入作為備援。
       </div>
     </section>
+
+    <section class="card section rules-entry-card">
+      <div class="rules-entry-copy">
+        <p class="eyebrow">玩家入口 QR</p>
+        <h2>掃碼加入或回到遊戲</h2>
+        <p class="lede">請玩家用手機掃描下方二維碼，進入玩家入口後選擇組別、玩家代碼與暱稱。</p>
+      </div>
+      <div class="rules-entry-qr-wrap">
+        <div id="rulesEntryQr" class="rules-entry-qr"></div>
+        <p id="rulesEntryQrError" class="muted" hidden>二維碼產生失敗，請確認 vendor/qrcode.min.js 是否載入。</p>
+        <p class="rules-entry-url">玩家入口網址：<strong id="rulesEntryQrText">https://charging-station-game.web.app/player.html</strong></p>
+      </div>
+    </section>
   </main>
+
+  <script src="vendor/qrcode.min.js?v=dev15-20260627-1"></script>
+  <script src="rules.js?v=dev15-20260627-1"></script>
 </body>
 </html>
