@@ -1,121 +1,153 @@
-const MATERIALS = [
-  "wire",
-  "outlet",
-  "wifi",
-  "fast_cable",
-  "power_bank",
-  "reboot",
-  "reminder",
-  "companion",
-  "support"
+const WORK_TYPES = [
+  "audio",
+  "activity",
+  "food",
+  "service",
+  "photo",
+  "video",
+  "design",
+  "venue",
+  "promo"
 ];
 
-const MATERIAL_LABELS = {
-  wire: "充電線",
-  outlet: "插座",
-  wifi: "無線網路",
-  fast_cable: "快充線",
-  power_bank: "行動電源",
-  reboot: "重開機",
-  reminder: "提醒卡",
-  companion: "同行卡",
-  support: "陪伴卡"
+const WORK_LABELS = {
+  audio: "音控組",
+  activity: "活動組",
+  food: "膳食組",
+  service: "服務組",
+  photo: "攝影組",
+  video: "錄影組",
+  design: "美宣組",
+  venue: "場佈組",
+  promo: "宣傳組"
+};
+
+const TASK_DEFS = {
+  characterCamp: {
+    name: "崇正品格夏令營",
+    required: { audio: 14, activity: 54, food: 24, service: 30, photo: 16, video: 14, design: 16, venue: 20, promo: 12 }
+  },
+  parentsDay: {
+    name: "雙親節",
+    required: { audio: 12, activity: 26, food: 16, service: 22, photo: 16, video: 12, design: 24, venue: 44, promo: 28 }
+  },
+  ruralCamp: {
+    name: "森耕偏鄉夏令營",
+    required: { audio: 10, activity: 54, food: 24, service: 38, photo: 20, video: 14, design: 14, venue: 16, promo: 10 }
+  },
+  jurassicCamp: {
+    name: "侏羅紀重生大作戰夏令營",
+    required: { audio: 16, activity: 58, food: 20, service: 28, photo: 16, video: 20, design: 20, venue: 16, promo: 6 }
+  },
+  miaoJiMemorial: {
+    name: "妙極大帝紀念晚會",
+    required: { audio: 26, activity: 48, food: 10, service: 16, photo: 20, video: 26, design: 24, venue: 20, promo: 10 }
+  },
+  guangYuMemorial: {
+    name: "光裕大帝紀念晚會",
+    required: { audio: 26, activity: 48, food: 10, service: 16, photo: 20, video: 26, design: 24, venue: 20, promo: 10 }
+  },
+  walkerOverseas: {
+    name: "越行者海外志工",
+    required: { audio: 10, activity: 54, food: 24, service: 42, photo: 24, video: 16, design: 10, venue: 10, promo: 10 }
+  },
+  southIndiaOverseas: {
+    name: "歡印光臨南印度海外志工",
+    required: { audio: 10, activity: 54, food: 24, service: 42, photo: 24, video: 16, design: 10, venue: 10, promo: 10 }
+  },
+  springTea: {
+    name: "各組線春節茶敘",
+    required: { audio: 12, activity: 50, food: 34, service: 28, photo: 12, video: 10, design: 16, venue: 26, promo: 12 }
+  },
+  volunteerYearEnd: {
+    name: "崇正志工尾牙",
+    required: { audio: 24, activity: 54, food: 38, service: 24, photo: 12, video: 16, design: 16, venue: 12, promo: 4 }
+  },
+  lifeFuService: {
+    name: "HOLD住生命的FU-機構服務",
+    required: { audio: 6, activity: 30, food: 16, service: 68, photo: 20, video: 14, design: 14, venue: 10, promo: 22 }
+  }
+};
+
+const FINAL_TASK_DEF = {
+  id: "final120",
+  name: "白陽祖師傳道120週年紀念大會",
+  perTeamDemand: 200,
+  distribution: {
+    audio: 0.13,
+    activity: 0.22,
+    food: 0.10,
+    service: 0.15,
+    photo: 0.08,
+    video: 0.10,
+    design: 0.08,
+    venue: 0.09,
+    promo: 0.05
+  }
+};
+
+const NEGATIVE_STATUS_DEFS = {
+  sleep: { label: "補眠", min: 5, max: 8 },
+  exhausted: { label: "體力透支", min: 8, max: 12 },
+  unwilling: { label: "不想工作", min: 10, max: 15 },
+  conflict: { label: "跟夥伴吵架", min: 12, max: 20 }
 };
 
 const MAX_TEAMS = 15;
-const DEFAULT_TEAM_COUNT = 15;
-const DEFAULT_TEAM_SIZE = 4;
+const DEFAULT_TEAM_COUNT = 8;
+const DEFAULT_TEAM_SIZE = 16;
+const ROUND_DURATION_MS = 10 * 60 * 1000;
+const FINAL_DURATION_MS = 10 * 60 * 1000;
+const MAX_PROFICIENCY = 3;
+const PROFICIENCY_STEP = 0.1;
+const PLAYER_ENTRY_URL = "https://charging-station-game.web.app/player.html";
 const TEAM_LETTERS = Array.from({ length: MAX_TEAMS }, (_, i) => String.fromCharCode(65 + i));
 const TEAM_NAMES = TEAM_LETTERS.reduce((map, letter, index) => {
   map[`team${index + 1}`] = letter;
   return map;
 }, {});
 
-const BOSS_DEFS = {
-  boss1: {
-    name: "全城小停電",
-    hp: 18,
-    required: { wire: 6, outlet: 6, wifi: 6 }
-  },
-  boss2: {
-    name: "材料大缺貨",
-    hp: 24,
-    required: { wire: 6, outlet: 6, fast_cable: 6, power_bank: 6 }
-  },
-  boss3: {
-    name: "關機區爆滿",
-    hp: 30,
-    required: { power_bank: 8, reboot: 8, wifi: 7, support: 7 }
-  },
-  boss4: {
-    name: "週三遺忘獸",
-    hp: 36,
-    required: { reminder: 8, companion: 8, power_bank: 6, reboot: 6, wire: 4, wifi: 4 }
-  }
-};
-
-const ORDER_DEFS = {
-  order1: {
-    name: "快充補給單",
-    reward: 10,
-    required: { wire: 2, outlet: 1, fast_cable: 1 }
-  },
-  order2: {
-    name: "全場連線單",
-    reward: 12,
-    required: { wifi: 3, power_bank: 1, wire: 1 }
-  },
-  order3: {
-    name: "重新啟動單",
-    reward: 15,
-    required: { reboot: 2, reminder: 2, support: 1 }
-  },
-  order4: {
-    name: "同行支援單",
-    reward: 18,
-    required: { companion: 2, support: 2, power_bank: 2 }
-  },
-  order5: {
-    name: "臨時補電單",
-    reward: 14,
-    required: { power_bank: 2, outlet: 2, wire: 1 }
-  },
-  order6: {
-    name: "穩定訊號單",
-    reward: 16,
-    required: { wifi: 3, reboot: 1, companion: 1 }
-  },
-  order7: {
-    name: "週三提醒單",
-    reward: 14,
-    required: { reminder: 3, support: 1, fast_cable: 1 }
-  },
-  order8: {
-    name: "全員支援單",
-    reward: 20,
-    required: { companion: 2, support: 2, reminder: 2, wifi: 1 }
-  }
-};
+// Backward-compatible aliases for pages that still load shared helpers.
+const MATERIALS = WORK_TYPES;
+const MATERIAL_LABELS = WORK_LABELS;
+const BOSS_DEFS = {};
+const ORDER_DEFS = TASK_DEFS;
 
 window.APP = {
-  MATERIALS,
-  MATERIAL_LABELS,
+  WORK_TYPES,
+  WORK_LABELS,
+  TASK_DEFS,
+  FINAL_TASK_DEF,
+  NEGATIVE_STATUS_DEFS,
   MAX_TEAMS,
   DEFAULT_TEAM_COUNT,
   DEFAULT_TEAM_SIZE,
+  ROUND_DURATION_MS,
+  FINAL_DURATION_MS,
+  MAX_PROFICIENCY,
+  PROFICIENCY_STEP,
+  PLAYER_ENTRY_URL,
   TEAM_LETTERS,
-  TEAM_NAMES,
-  BOSS_DEFS,
-  ORDER_DEFS
+  TEAM_NAMES
 };
 
-window.MATERIALS = MATERIALS;
-window.MATERIAL_LABELS = MATERIAL_LABELS;
+window.WORK_TYPES = WORK_TYPES;
+window.WORK_LABELS = WORK_LABELS;
+window.TASK_DEFS = TASK_DEFS;
+window.FINAL_TASK_DEF = FINAL_TASK_DEF;
+window.NEGATIVE_STATUS_DEFS = NEGATIVE_STATUS_DEFS;
 window.MAX_TEAMS = MAX_TEAMS;
 window.DEFAULT_TEAM_COUNT = DEFAULT_TEAM_COUNT;
 window.DEFAULT_TEAM_SIZE = DEFAULT_TEAM_SIZE;
+window.ROUND_DURATION_MS = ROUND_DURATION_MS;
+window.FINAL_DURATION_MS = FINAL_DURATION_MS;
+window.MAX_PROFICIENCY = MAX_PROFICIENCY;
+window.PROFICIENCY_STEP = PROFICIENCY_STEP;
+window.PLAYER_ENTRY_URL = PLAYER_ENTRY_URL;
 window.TEAM_LETTERS = TEAM_LETTERS;
 window.TEAM_NAMES = TEAM_NAMES;
+window.MATERIALS = MATERIALS;
+window.MATERIAL_LABELS = MATERIAL_LABELS;
 window.BOSS_DEFS = BOSS_DEFS;
 window.ORDER_DEFS = ORDER_DEFS;
 
@@ -142,20 +174,33 @@ function normalizeTeamSize(value) {
 window.normalizeTeamSize = normalizeTeamSize;
 
 function parsePayload(text) {
-  const raw = String(text || "").trim();
-  const [type, value] = raw.split(":");
-
+  const raw = String(text || "").trim().replace(/：/g, ":");
+  const [type, ...rest] = raw.split(":");
   return {
-    type: (type || "").toUpperCase(),
-    value: (value || "").trim()
+    raw,
+    type: String(type || "").toUpperCase(),
+    value: rest.join(":").trim()
   };
 }
 window.parsePayload = parsePayload;
 
-function materialLabel(material) {
-  return MATERIAL_LABELS[material] || material || "無";
+function workLabel(workType) {
+  return WORK_LABELS[workType] || workType || "無";
 }
-window.materialLabel = materialLabel;
+window.workLabel = workLabel;
+window.materialLabel = workLabel;
+
+function negativeStatusLabel(statusId) {
+  return NEGATIVE_STATUS_DEFS[statusId]?.label || statusId || "需要協助";
+}
+window.negativeStatusLabel = negativeStatusLabel;
+
+function playerStatusLabel(player) {
+  if (!player) return "尚未加入";
+  if (player.status === "normal") return "正常";
+  return negativeStatusLabel(player.negativeStatus?.id || player.status);
+}
+window.playerStatusLabel = playerStatusLabel;
 
 function teamNumber(teamId) {
   const n = Number(String(teamId || "").replace(/^team/i, ""));
@@ -179,14 +224,44 @@ function sortedTeamEntries(teams) {
 }
 window.sortedTeamEntries = sortedTeamEntries;
 
-function teamCapacity(totalPlayers, index, teamCount = DEFAULT_TEAM_COUNT) {
-  const count = normalizeTeamCount(teamCount);
-  const total = Math.max(0, Number(totalPlayers || 0));
-  const base = Math.floor(total / count);
-  const extra = total % count;
-  return base + (index < extra ? 1 : 0);
+function makeInitialProficiency() {
+  return WORK_TYPES.reduce((profile, workType) => {
+    profile[workType] = 1;
+    return profile;
+  }, {});
 }
-window.teamCapacity = teamCapacity;
+window.makeInitialProficiency = makeInitialProficiency;
+
+function normalizedProficiency(profile) {
+  const source = profile || {};
+  return WORK_TYPES.reduce((next, workType) => {
+    const n = Number(source[workType] || 1);
+    next[workType] = Math.max(1, Math.min(MAX_PROFICIENCY, n));
+    return next;
+  }, {});
+}
+window.normalizedProficiency = normalizedProficiency;
+
+function personalBalanceMultiplier(profile) {
+  const values = Object.values(normalizedProficiency(profile));
+  const min = Math.min(...values);
+  if (min >= 2.5) return 1.2;
+  if (min >= 2) return 1.15;
+  if (min >= 1.5) return 1.1;
+  if (min >= 1.2) return 1.05;
+  return 1;
+}
+window.personalBalanceMultiplier = personalBalanceMultiplier;
+
+function personalBalanceLabel(profile) {
+  const multiplier = personalBalanceMultiplier(profile);
+  if (multiplier >= 1.2) return "均衡發展 +20%";
+  if (multiplier >= 1.15) return "均衡發展 +15%";
+  if (multiplier >= 1.1) return "均衡發展 +10%";
+  if (multiplier >= 1.05) return "均衡發展 +5%";
+  return "均衡發展尚未啟動";
+}
+window.personalBalanceLabel = personalBalanceLabel;
 
 function makeTeam(teamId, index, teamSize) {
   return {
@@ -194,10 +269,12 @@ function makeTeam(teamId, index, teamSize) {
     letter: TEAM_LETTERS[index],
     capacity: normalizeTeamSize(teamSize),
     score: 0,
-    supportPoints: 0,
-    bossContribution: 0,
-    completedOrders: 0,
-    inventory: {}
+    completedTasks: 0,
+    supportDeliveries: 0,
+    finalContribution: 0,
+    canSupport: false,
+    currentTaskId: null,
+    currentTaskName: null
   };
 }
 window.makeTeam = makeTeam;
@@ -215,118 +292,165 @@ function makeTeams(teamCount = DEFAULT_TEAM_COUNT, teamSize = DEFAULT_TEAM_SIZE)
 }
 window.makeTeams = makeTeams;
 
+function cloneRequired(required) {
+  return WORK_TYPES.reduce((next, workType) => {
+    const n = Number(required?.[workType] || 0);
+    if (n > 0) next[workType] = n;
+    return next;
+  }, {});
+}
+window.cloneRequired = cloneRequired;
+
+function emptyProgress(required) {
+  return Object.keys(required || {}).reduce((next, workType) => {
+    next[workType] = 0;
+    return next;
+  }, {});
+}
+window.emptyProgress = emptyProgress;
+
+function pickTaskDefId() {
+  const ids = Object.keys(TASK_DEFS);
+  return ids[Math.floor(Math.random() * ids.length)];
+}
+window.pickTaskDefId = pickTaskDefId;
+
+function makeTeamTask(teamId, round, defId = pickTaskDefId()) {
+  const def = TASK_DEFS[defId] || TASK_DEFS[Object.keys(TASK_DEFS)[0]];
+  const required = cloneRequired(def.required);
+
+  return {
+    id: `${round}_${teamId}_${defId}_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
+    defId,
+    teamId,
+    round,
+    name: def.name,
+    required,
+    progress: emptyProgress(required),
+    active: true,
+    completed: false,
+    completedAt: null,
+    startedAt: Date.now()
+  };
+}
+window.makeTeamTask = makeTeamTask;
+
+function makeRoundTasks(teamCount, round) {
+  const count = normalizeTeamCount(teamCount);
+  const tasks = {};
+
+  for (let i = 1; i <= count; i++) {
+    const teamId = `team${i}`;
+    tasks[teamId] = makeTeamTask(teamId, round);
+  }
+
+  return tasks;
+}
+window.makeRoundTasks = makeRoundTasks;
+
+function makeFinalTask(teamCount = DEFAULT_TEAM_COUNT) {
+  const total = normalizeTeamCount(teamCount) * FINAL_TASK_DEF.perTeamDemand;
+  const required = {};
+  let assigned = 0;
+
+  WORK_TYPES.forEach(workType => {
+    const count = Math.round(total * Number(FINAL_TASK_DEF.distribution[workType] || 0));
+    required[workType] = count;
+    assigned += count;
+  });
+
+  required.activity += total - assigned;
+
+  return {
+    id: `${FINAL_TASK_DEF.id}_${Date.now()}`,
+    name: FINAL_TASK_DEF.name,
+    required,
+    progress: emptyProgress(required),
+    active: true,
+    completed: false,
+    completedAt: null,
+    startedAt: Date.now()
+  };
+}
+window.makeFinalTask = makeFinalTask;
+
+function taskRequiredTotal(task) {
+  return Object.values(task?.required || {}).reduce((sum, n) => sum + Number(n || 0), 0);
+}
+window.taskRequiredTotal = taskRequiredTotal;
+
+function taskProgressTotal(task) {
+  const required = task?.required || {};
+  const progress = task?.progress || {};
+  return Object.entries(required).reduce((sum, [workType, need]) => {
+    return sum + Math.min(Number(progress[workType] || 0), Number(need || 0));
+  }, 0);
+}
+window.taskProgressTotal = taskProgressTotal;
+
+function taskPercent(task) {
+  const total = taskRequiredTotal(task);
+  if (!total) return 0;
+  return Math.max(0, Math.min(100, Math.round((taskProgressTotal(task) / total) * 100)));
+}
+window.taskPercent = taskPercent;
+
+function isTaskComplete(task) {
+  return taskPercent(task) >= 100;
+}
+window.isTaskComplete = isTaskComplete;
+
 function defaultState() {
   return {
     game: {
       status: "lobby",
       phase: "lobby",
+      round: 0,
+      maxRounds: 3,
       totalPlayers: 0,
       teamCount: DEFAULT_TEAM_COUNT,
       teamSize: DEFAULT_TEAM_SIZE,
-      currentBoss: 1,
       startedAt: null,
+      roundStartedAt: null,
+      roundEndsAt: null,
       message: "等待主持人建立遊戲。"
     },
     teams: {},
     players: {},
-    boss: null,
-    order: null
+    tasksByTeam: {},
+    finalTask: null,
+    global: {
+      ignorance: null
+    }
   };
 }
 window.defaultState = defaultState;
 
-function cloneRequired(required) {
-  const result = {};
-
-  Object.entries(required || {}).forEach(([material, count]) => {
-    const n = Number(count || 0);
-    if (n > 0) result[material] = n;
-  });
-
-  return result;
+function randomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+window.randomInteger = randomInteger;
 
-function orderTotalRequired(order) {
-  return Object.values(order?.required || {}).reduce((sum, n) => sum + Number(n || 0), 0);
-}
-window.orderTotalRequired = orderTotalRequired;
-
-function orderTeamProgress(order, team) {
-  const required = order?.required || {};
-  const inventory = team?.inventory || {};
-
-  let got = 0;
-  let total = 0;
-
-  Object.entries(required).forEach(([material, need]) => {
-    const requiredCount = Number(need || 0);
-    const haveCount = Number(inventory[material] || 0);
-
-    total += requiredCount;
-    got += Math.min(haveCount, requiredCount);
-  });
-
-  return { got, total };
-}
-window.orderTeamProgress = orderTeamProgress;
-
-function canTeamCompleteOrder(order, team) {
-  if (!order || order.active !== true) return false;
-
-  const required = order.required || {};
-  const inventory = team?.inventory || {};
-
-  return Object.entries(required).every(([material, need]) => {
-    return Number(inventory[material] || 0) >= Number(need || 0);
-  });
-}
-window.canTeamCompleteOrder = canTeamCompleteOrder;
-
-function pickRandomOrderDef(previousDefId) {
-  const ids = Object.keys(ORDER_DEFS);
-  const candidates = ids.filter(id => id !== previousDefId);
-  const pool = candidates.length ? candidates : ids;
-  const pickedId = pool[Math.floor(Math.random() * pool.length)];
+function randomNegativeStatus() {
+  const ids = Object.keys(NEGATIVE_STATUS_DEFS);
+  const id = ids[Math.floor(Math.random() * ids.length)];
+  const def = NEGATIVE_STATUS_DEFS[id];
 
   return {
-    id: pickedId,
-    def: ORDER_DEFS[pickedId]
+    id,
+    label: def.label,
+    needed: randomInteger(def.min, def.max),
+    count: 0,
+    rescuedBy: {},
+    startedAt: Date.now()
   };
 }
+window.randomNegativeStatus = randomNegativeStatus;
 
-function makeRandomOrder(previousDefId) {
-  const picked = pickRandomOrderDef(previousDefId);
-  const required = cloneRequired(picked.def.required);
-
-  return {
-    active: true,
-    id: `${picked.id}_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
-    defId: picked.id,
-    name: picked.def.name,
-    reward: Number(picked.def.reward || 10),
-    required,
-    createdAt: Date.now(),
-    completedBy: null,
-    completedAt: null
-  };
+function randomIgnoranceTarget() {
+  return randomInteger(1, 10) * 100;
 }
-window.makeRandomOrder = makeRandomOrder;
-
-async function ensureRandomOrder(db, data) {
-  const game = data?.game || {};
-  const order = data?.order;
-
-  if (game.status !== "running") return;
-  if (order && order.active === true) return;
-
-  await db.ref("/order").transaction(current => {
-    if (current && current.active === true) return current;
-
-    const previousDefId = current?.defId || null;
-    return makeRandomOrder(previousDefId);
-  });
-}
-window.ensureRandomOrder = ensureRandomOrder;
+window.randomIgnoranceTarget = randomIgnoranceTarget;
 
 window.initFirebase = function initFirebase() {
   if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);

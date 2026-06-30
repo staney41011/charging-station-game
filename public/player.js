@@ -10,16 +10,11 @@ let latestData = defaultState();
 let returnCandidateCode = "";
 let currentPlayerRef = null;
 
-function statusLabel(status) {
-  return status === "down" ? "沒電" : "正常";
-}
-
 function normalizePayloadText(text) {
   return String(text || "")
     .trim()
     .replace(/：/g, ":")
-    .replace(/\s+/g, "")
-    .toUpperCase();
+    .replace(/\s+/g, "");
 }
 
 function showResult(text) {
@@ -43,6 +38,11 @@ function showError(text) {
   el.className = "result-banner result-danger";
 }
 
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
 function canTrigger(key) {
   const now = Date.now();
   const last = lastActionAt.get(key) || 0;
@@ -58,16 +58,11 @@ function canTrigger(key) {
 
 function gameStatusText(status) {
   return {
-    lobby: "等待主持人開始遊戲",
+    lobby: "等待活動開始",
     running: "遊戲進行中",
     paused: "遊戲暫停",
     ended: "遊戲結束"
-  }[status] || "等待主持人開始遊戲";
-}
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
+  }[status] || "等待活動開始";
 }
 
 function renderFloatBadge(player) {
@@ -82,6 +77,23 @@ function renderFloatBadge(player) {
   badge.hidden = false;
   setText("floatCode", normalizeCode(player.code));
   setText("floatNickname", player.nickname || normalizeCode(player.code));
+}
+
+function taskProgressLine(task) {
+  if (!task) return "目前尚未分配任務";
+  return `${task.name}｜${taskPercent(task)}%`;
+}
+
+function proficiencyLine(player) {
+  const profile = normalizedProficiency(player?.proficiency);
+  const top = WORK_TYPES
+    .map(workType => ({ workType, value: Number(profile[workType] || 1) }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 3)
+    .map(item => `${workLabel(item.workType)} ${item.value.toFixed(1)}`)
+    .join("、");
+
+  return `${personalBalanceLabel(profile)}｜最高熟練：${top}`;
 }
 
 function renderPlayerToScreen(player) {
@@ -109,14 +121,15 @@ function renderPlayerToScreen(player) {
   const normalizedPlayer = {
     ...player,
     code: normalizeCode(player.code),
-    rescueCount: player.rescueCount || 0,
-    rescuedBy: player.rescuedBy || {}
+    proficiency: normalizedProficiency(player.proficiency)
   };
+  const isNormal = normalizedPlayer.status === "normal";
+  const team = latestData.teams?.[normalizedPlayer.teamId];
+  const task = latestData.tasksByTeam?.[normalizedPlayer.teamId];
+  const carry = normalizedPlayer.carrying ? workLabel(normalizedPlayer.carrying) : "無";
+  const status = playerStatusLabel(normalizedPlayer);
 
   currentPlayerCode = normalizedPlayer.code;
-  const team = latestData.teams?.[normalizedPlayer.teamId];
-  const carry = normalizedPlayer.carrying ? materialLabel(normalizedPlayer.carrying) : "無";
-  const status = statusLabel(normalizedPlayer.status);
   renderFloatBadge(normalizedPlayer);
 
   setText("summaryCode", normalizedPlayer.code || "-");
@@ -125,39 +138,48 @@ function renderPlayerToScreen(player) {
   setText("summaryStatus", status);
   setText("summaryCarry", carry);
   setText("playerTitle", `${normalizedPlayer.code}｜${normalizedPlayer.nickname || normalizedPlayer.code}`);
-  setText("playerSubtitle", `${teamDisplayName(normalizedPlayer.teamId, team)}｜目前攜帶：${carry}`);
+  setText("playerSubtitle", `${teamDisplayName(normalizedPlayer.teamId, team)}｜${taskProgressLine(task)}`);
   setText("playerStatusBadge", status);
-  $("#playerStatusBadge").className = `player-status-badge ${normalizedPlayer.status === "down" ? "badge-down" : "badge-normal"}`;
+  $("#playerStatusBadge").className = `player-status-badge ${isNormal ? "badge-normal" : "badge-down"}`;
 
   $("#playerCard").innerHTML = `
     <div class="player-card-line">
       <strong>${normalizedPlayer.code}</strong>
-      <span class="pill ${normalizedPlayer.status === "down" ? "danger-pill" : ""}">${status}</span>
+      <span class="pill ${isNormal ? "ok-pill" : "danger-pill"}">${status}</span>
     </div>
     <div class="muted">${normalizedPlayer.nickname || ""} · ${teamDisplayName(normalizedPlayer.teamId, team)}</div>
+    <div class="muted">目前任務：${taskProgressLine(task)}</div>
     <div class="muted">目前攜帶：${carry}</div>
+    <div class="muted">${proficiencyLine(normalizedPlayer)}</div>
+    <div class="muted">${team?.canSupport ? "本組任務已完成，可以支援其他組。" : "本組任務完成前，請先交付自己的任務。"}</div>
   `;
 
-  if (normalizedPlayer.status === "down") {
+  if (!isNormal) {
+    const negative = normalizedPlayer.negativeStatus || {};
+    const needed = Number(negative.needed || 5);
+    const count = Number(negative.count || 0);
+
     $("#activeActionCard").hidden = true;
     $("#downSection").hidden = false;
-    setText("downProgress", `${normalizedPlayer.rescueCount || 0} / 5`);
+    setText("downTitle", status);
+    setText("downProgress", `${count} / ${needed}`);
+    setText("downNote", `請讓 ${needed} 位不同玩家掃你的救援 QR，你才會恢復行動。`);
     setText("downQrText", `RESCUE:${normalizedPlayer.code}`);
-    renderRescueQr(normalizedPlayer.code);
+    renderRescueQr(normalizedPlayer.code, status);
   } else {
     $("#activeActionCard").hidden = false;
     $("#downSection").hidden = true;
   }
 }
 
-function renderRescueQr(code) {
+function renderRescueQr(code, title) {
   const mount = $("#downQr");
   if (!mount) return;
 
   const rescuePayload = `RESCUE:${code}`;
   mount.innerHTML = `
     <div class="rescue-qr-card">
-      <div class="rescue-qr-title">請掃我救援</div>
+      <div class="rescue-qr-title">請協助我：${title || "需要協助"}</div>
       <div class="rescue-qr-mount"></div>
       <div class="rescue-qr-code">${rescuePayload}</div>
     </div>
@@ -205,9 +227,8 @@ function watchCurrentPlayer(code) {
 
       renderPlayerToScreen(player);
 
-      if (player.status === "down") {
+      if (player.status !== "normal") {
         await stopQrScanner();
-        showError(`你沒電了！救援進度：${player.rescueCount || 0} / 5`);
       }
     },
     err => {
@@ -218,7 +239,6 @@ function watchCurrentPlayer(code) {
 
 async function getCurrentPlayer() {
   if (!currentPlayerCode) return null;
-
   const snap = await db.ref(`/players/${currentPlayerCode}`).get();
   return snap.val();
 }
@@ -342,8 +362,7 @@ async function joinGame() {
       number: Number(code.slice(1)) || 1,
       status: "normal",
       carrying: null,
-      rescueCount: 0,
-      rescuedBy: {},
+      proficiency: makeInitialProficiency(),
       joinedAt: Date.now()
     };
 
@@ -391,7 +410,7 @@ async function lookupReturnPlayer() {
     }
 
     const team = latestData.teams?.[player.teamId];
-    const carry = player.carrying ? materialLabel(player.carrying) : "無";
+    const carry = player.carrying ? workLabel(player.carrying) : "無";
 
     returnCandidateCode = code;
     $("#returnConfirm").hidden = false;
@@ -400,7 +419,7 @@ async function lookupReturnPlayer() {
       <div class="return-title">你要回到：</div>
       <strong>${player.code}｜${player.nickname || player.code}</strong>
       <div>${teamDisplayName(player.teamId, team)}</div>
-      <div>目前狀態：${statusLabel(player.status)}</div>
+      <div>目前狀態：${playerStatusLabel(player)}</div>
       <div>目前攜帶：${carry}</div>
     `;
 
@@ -433,13 +452,13 @@ async function confirmReturnGame() {
   }
 }
 
-async function handlePickupMaterial(player, material) {
-  if (!MATERIALS.includes(material)) {
-    throw new Error("未知材料，請確認 QR 是否正確。");
+async function handlePickupWork(player, workType) {
+  if (!WORK_TYPES.includes(workType)) {
+    throw new Error("未知工作小組，請確認 QR 是否正確。");
   }
 
   let changed = false;
-  let reason = "取得材料失敗，請再試一次。";
+  let reason = "取得工作記錄失敗，請再試一次。";
 
   const result = await db.ref(`/players/${player.code}`).transaction(current => {
     if (!current) {
@@ -447,127 +466,244 @@ async function handlePickupMaterial(player, material) {
       return current;
     }
     if (current.status !== "normal") {
-      reason = "你沒電了，不能行動。";
+      reason = "你目前需要協助，不能行動。";
       return current;
     }
     if (current.carrying) {
-      reason = `你已經帶著 ${materialLabel(current.carrying)}，請先交付。`;
+      reason = `你已經帶著 ${workLabel(current.carrying)} 工作記錄，請先交付。`;
       return current;
     }
 
     changed = true;
-    return { ...current, carrying: material };
+    return { ...current, carrying: workType };
   });
 
   if (!changed || !result.committed) {
     throw new Error(reason);
   }
 
-  return `成功取得：${materialLabel(material)}`;
+  return `成功取得：${workLabel(workType)}工作記錄`;
 }
 
-async function handleDeliverWarehouse(player, teamId) {
+async function consumeWorkRecord(playerCode, workType) {
+  let consumed = false;
+  let reason = "交付失敗，請再試一次。";
+  let contribution = 1;
+  let before = 1;
+  let multiplier = 1;
+
+  const result = await db.ref(`/players/${playerCode}`).transaction(current => {
+    if (!current) {
+      reason = "找不到玩家資料，請重新回到遊戲。";
+      return current;
+    }
+    if (current.status !== "normal") {
+      reason = "你目前需要協助，不能行動。";
+      return current;
+    }
+    if (current.carrying !== workType) {
+      reason = "你手上的工作記錄已改變，請重新確認。";
+      return current;
+    }
+
+    const profile = normalizedProficiency(current.proficiency);
+    before = Number(profile[workType] || 1);
+    multiplier = personalBalanceMultiplier(profile);
+    contribution = Number((before * multiplier).toFixed(2));
+    profile[workType] = Number(Math.min(MAX_PROFICIENCY, before + PROFICIENCY_STEP).toFixed(1));
+    consumed = true;
+
+    return {
+      ...current,
+      carrying: null,
+      proficiency: profile
+    };
+  });
+
+  if (!consumed || !result.committed) {
+    throw new Error(reason);
+  }
+
+  return { contribution, before, multiplier };
+}
+
+async function addContributionToTask(taskPath, workType, contribution) {
+  let completedNow = false;
+  let accepted = false;
+
+  const result = await db.ref(taskPath).transaction(task => {
+    if (!task || task.active !== true || task.completed === true) return task;
+    if (!Number(task.required?.[workType] || 0)) return task;
+
+    const required = task.required || {};
+    const progress = { ...(task.progress || {}) };
+    progress[workType] = Number((Number(progress[workType] || 0) + contribution).toFixed(2));
+
+    const nextTask = {
+      ...task,
+      progress,
+      updatedAt: Date.now()
+    };
+
+    accepted = true;
+
+    if (isTaskComplete(nextTask)) {
+      completedNow = true;
+      nextTask.completed = true;
+      nextTask.completedAt = Date.now();
+    }
+
+    return nextTask;
+  });
+
+  if (!accepted || !result.committed) {
+    throw new Error("這個任務目前不需要這項工作，或任務已完成。");
+  }
+
+  return {
+    task: result.snapshot.val(),
+    completedNow
+  };
+}
+
+async function handleDeliverTeam(player, teamId) {
   const current = await getCurrentPlayer();
   const targetTeamSnap = await db.ref(`/teams/${teamId}`).get();
   const targetTeam = targetTeamSnap.val();
 
   if (!current) throw new Error("請先加入遊戲或回到遊戲。");
-  if (current.status !== "normal") throw new Error("你沒電了，不能行動。");
-  if (!current.carrying) throw new Error("你現在沒有攜帶材料。");
-  if (!targetTeam) throw new Error("這個倉庫目前沒有開放。");
+  if (current.status !== "normal") throw new Error("你目前需要協助，不能行動。");
+  if (!current.carrying) throw new Error("你現在沒有攜帶工作記錄。");
+  if (!targetTeam) throw new Error("這個任務交付處目前沒有開放。");
 
-  const material = current.carrying;
-  let cleared = false;
-  let reason = "交付失敗，請再試一次。";
+  const ownTeamSnap = await db.ref(`/teams/${current.teamId}`).get();
+  const ownTeam = ownTeamSnap.val();
+  const isOwnTeam = current.teamId === teamId;
 
-  const clearResult = await db.ref(`/players/${player.code}`).transaction(active => {
-    if (!active) {
-      reason = "找不到玩家資料。";
-      return active;
-    }
-    if (active.status !== "normal") {
-      reason = "你沒電了，不能行動。";
-      return active;
-    }
-    if (active.carrying !== material) {
-      reason = "你手上的材料已改變，請重新確認。";
-      return active;
-    }
-
-    cleared = true;
-    return { ...active, carrying: null };
-  });
-
-  if (!cleared || !clearResult.committed) {
-    throw new Error(reason);
+  if (!isOwnTeam && ownTeam?.canSupport !== true) {
+    throw new Error("本組任務完成後，才可以支援別組任務。");
   }
 
-  await db.ref(`/teams/${teamId}/inventory/${material}`).transaction(v => (v || 0) + 1);
+  const taskSnap = await db.ref(`/tasksByTeam/${teamId}`).get();
+  const task = taskSnap.val();
 
-  if (current.teamId !== teamId) {
-    await db.ref(`/teams/${current.teamId}/supportPoints`).transaction(v => (v || 0) + 1);
-    await db.ref(`/teams/${current.teamId}/score`).transaction(v => (v || 0) + 1);
+  if (!task || task.active !== true) {
+    throw new Error("這一組目前沒有可交付的活動任務。");
   }
 
-  return `已送達：${teamDisplayName(teamId, targetTeam)}倉庫`;
+  if (task.completed === true) {
+    throw new Error("這一組任務已完成，請改支援其他尚未完成的組別。");
+  }
+
+  const workType = current.carrying;
+  const contributionInfo = await consumeWorkRecord(current.code, workType);
+  const taskResult = await addContributionToTask(`/tasksByTeam/${teamId}`, workType, contributionInfo.contribution);
+
+  await db.ref(`/teams/${current.teamId}/score`).transaction(v => Number((Number(v || 0) + contributionInfo.contribution).toFixed(2)));
+
+  if (!isOwnTeam) {
+    await db.ref(`/teams/${current.teamId}/supportDeliveries`).transaction(v => Number(v || 0) + 1);
+  }
+
+  if (taskResult.completedNow) {
+    await db.ref(`/teams/${teamId}`).transaction(team => {
+      if (!team) return team;
+      return {
+        ...team,
+        canSupport: true,
+        completedTasks: Number(team.completedTasks || 0) + 1,
+        score: Number((Number(team.score || 0) + 20).toFixed(2))
+      };
+    });
+    await db.ref("/game/message").set(`${teamDisplayName(teamId, targetTeam)} 完成任務：${task.name}，可以開始支援其他組。`);
+    return `任務完成：${teamDisplayName(teamId, targetTeam)} 100%`;
+  }
+
+  return `已交付：${teamDisplayName(teamId, targetTeam)}｜${workLabel(workType)} +${contributionInfo.contribution}`;
 }
 
-async function handleDeliverBoss(player) {
+async function handleDeliverFinal(player) {
   const current = await getCurrentPlayer();
 
   if (!current) throw new Error("請先加入遊戲或回到遊戲。");
-  if (current.status !== "normal") throw new Error("你沒電了，不能行動。");
-  if (!current.carrying) throw new Error("你現在沒有攜帶材料。");
+  if (current.status !== "normal") throw new Error("你目前需要協助，不能行動。");
+  if (!current.carrying) throw new Error("你現在沒有攜帶工作記錄。");
 
-  const bossSnap = await db.ref("/boss").get();
-  const boss = bossSnap.val();
+  const finalSnap = await db.ref("/finalTask").get();
+  const finalTask = finalSnap.val();
 
-  if (!boss || boss.active !== true) {
-    throw new Error("目前尚未出現魔王，請等待主持人釋放魔王。");
+  if (!finalTask || finalTask.active !== true) {
+    throw new Error("目前還沒有開放大型任務交付。");
   }
 
-  const material = current.carrying;
-  const needed = Number(boss.required?.[material] || 0);
-  const delivered = Number(boss.delivered?.[material] || 0);
-
-  if (needed <= 0 || delivered >= needed) {
-    throw new Error("目前魔王不需要這個材料。");
+  if (finalTask.completed === true) {
+    throw new Error("最終大型活動已完成。");
   }
 
-  let hit = false;
-  const bossTxn = await db.ref("/boss").transaction(active => {
-    if (!active || active.active !== true || Number(active.hp || 0) <= 0) return active;
+  const workType = current.carrying;
+  const contributionInfo = await consumeWorkRecord(current.code, workType);
+  const taskResult = await addContributionToTask("/finalTask", workType, contributionInfo.contribution);
 
-    const activeNeeded = Number(active.required?.[material] || 0);
-    const activeDelivered = Number(active.delivered?.[material] || 0);
-
-    if (activeNeeded <= 0 || activeDelivered >= activeNeeded) return active;
-
-    hit = true;
+  await db.ref(`/teams/${current.teamId}`).transaction(team => {
+    if (!team) return team;
     return {
-      ...active,
-      delivered: {
-        ...(active.delivered || {}),
-        [material]: activeDelivered + 1
-      },
-      hp: Math.max(0, Number(active.hp || 0) - 1)
+      ...team,
+      finalContribution: Number((Number(team.finalContribution || 0) + contributionInfo.contribution).toFixed(2)),
+      score: Number((Number(team.score || 0) + contributionInfo.contribution).toFixed(2))
     };
   });
 
-  if (!hit || !bossTxn.committed) {
-    throw new Error("目前魔王不需要這個材料。");
+  if (taskResult.completedNow) {
+    await db.ref("/game").update({
+      phase: "final-complete",
+      message: `${FINAL_TASK_DEF.name} 完成！全場共同完成最後的大型活動。`
+    });
+    return `最終大型活動完成：100%`;
   }
 
-  await db.ref(`/players/${player.code}`).transaction(active => {
-    if (!active || active.status !== "normal") return active;
-    if (active.carrying !== material) return active;
-    return { ...active, carrying: null };
+  return `已交付大型任務：${workLabel(workType)} +${contributionInfo.contribution}`;
+}
+
+async function handleKouqiu(player) {
+  const current = await getCurrentPlayer();
+
+  if (!current) throw new Error("請先加入遊戲或回到遊戲。");
+  if (current.status !== "normal") throw new Error("你目前需要協助，不能行動。");
+
+  let nextCount = 0;
+  let target = 0;
+  let cleared = false;
+  let accepted = false;
+
+  const result = await db.ref("/global/ignorance").transaction(currentIgnorance => {
+    if (!currentIgnorance || currentIgnorance.active !== true) return currentIgnorance;
+
+    target = Number(currentIgnorance.target || 0);
+    nextCount = Number(currentIgnorance.count || 0) + 1;
+    accepted = true;
+
+    if (target > 0 && nextCount >= target) {
+      cleared = true;
+      return null;
+    }
+
+    return {
+      ...currentIgnorance,
+      count: nextCount,
+      updatedAt: Date.now()
+    };
   });
 
-  await db.ref(`/teams/${current.teamId}/bossContribution`).transaction(v => (v || 0) + 1);
-  await db.ref(`/teams/${current.teamId}/score`).transaction(v => (v || 0) + 1);
+  if (!accepted || !result.committed) {
+    throw new Error("目前沒有無明來襲需要叩求。");
+  }
 
-  return "成功攻擊魔王：血量 -1";
+  if (cleared) {
+    await db.ref("/game/message").set("本次無明已通過，請各組回到活動任務。");
+    return `叩求完成：本次無明已通過`;
+  }
+
+  return `叩求成功：${nextCount} / ${target}`;
 }
 
 async function handleRescuePlayer(scannerPlayer, targetCode) {
@@ -582,68 +718,87 @@ async function handleRescuePlayer(scannerPlayer, targetCode) {
   const latestScanner = scannerSnap.val();
 
   if (!latestScanner) throw new Error("找不到你的玩家資料，請重新回到遊戲。");
-  if (latestScanner.status !== "normal") throw new Error("你沒電了，不能救人。");
+  if (latestScanner.status !== "normal") throw new Error("你目前需要協助，不能救人。");
 
   const targetSnap = await db.ref(`/players/${normalizedTarget}`).get();
   const target = targetSnap.val();
 
   if (!target) throw new Error(`找不到 ${normalizedTarget} 這位玩家。`);
-  if (target.status !== "down") throw new Error("目標玩家目前不是沒電狀態。");
-  if (target.rescuedBy && target.rescuedBy[scannerCode]) throw new Error("你已經救過這位玩家。");
+  if (!target.status || target.status === "normal") throw new Error("目標玩家目前不需要救援。");
+
+  const needed = Number(target.negativeStatus?.needed || 5);
+  if (target.negativeStatus?.rescuedBy && target.negativeStatus.rescuedBy[scannerCode]) {
+    throw new Error("你已經協助過這位玩家。");
+  }
 
   let rescued = false;
-  const rescueTxn = await db.ref(`/players/${normalizedTarget}`).transaction(active => {
-    if (!active || active.status !== "down") return active;
+  let restored = false;
 
-    const rescuedBy = active.rescuedBy || {};
+  const rescueTxn = await db.ref(`/players/${normalizedTarget}`).transaction(active => {
+    if (!active || !active.status || active.status === "normal") return active;
+
+    const negativeStatus = active.negativeStatus || {
+      id: active.status,
+      label: negativeStatusLabel(active.status),
+      needed,
+      count: 0,
+      rescuedBy: {}
+    };
+    const rescuedBy = negativeStatus.rescuedBy || {};
+
     if (rescuedBy[scannerCode]) return active;
 
-    const nextCount = Number(active.rescueCount || 0) + 1;
-    const nextRescuedBy = {
-      ...rescuedBy,
-      [scannerCode]: true
-    };
-
+    const nextCount = Number(negativeStatus.count || 0) + 1;
     rescued = true;
 
-    if (nextCount >= 5) {
+    if (nextCount >= Number(negativeStatus.needed || needed)) {
+      restored = true;
       return {
         ...active,
         status: "normal",
-        rescueCount: 0,
-        rescuedBy: {}
+        negativeStatus: null
       };
     }
 
     return {
       ...active,
-      rescueCount: nextCount,
-      rescuedBy: nextRescuedBy
+      negativeStatus: {
+        ...negativeStatus,
+        count: nextCount,
+        rescuedBy: {
+          ...rescuedBy,
+          [scannerCode]: true
+        }
+      }
     };
   });
 
   if (!rescued || !rescueTxn.committed) {
-    throw new Error("你已經救過這位玩家。");
+    throw new Error("你已經協助過這位玩家。");
   }
 
-  await db.ref(`/teams/${latestScanner.teamId}/score`).transaction(v => (v || 0) + 1);
+  await db.ref(`/teams/${latestScanner.teamId}/score`).transaction(v => Number((Number(v || 0) + 1).toFixed(2)));
 
   const updatedTarget = rescueTxn.snapshot.val();
-  const targetName = updatedTarget.nickname || updatedTarget.code || normalizedTarget;
+  const targetName = target.nickname || target.code || normalizedTarget;
 
-  if (updatedTarget.status === "normal") {
-    await db.ref("/game/message").set(`${updatedTarget.code || normalizedTarget} ${targetName} 已恢復行動。`);
+  if (restored || updatedTarget.status === "normal") {
+    await db.ref("/game/message").set(`${normalizedTarget} ${targetName} 已恢復行動。`);
     return `${targetName} 已恢復行動`;
   }
 
-  return `救援成功：${updatedTarget.code || normalizedTarget} ${updatedTarget.rescueCount || 0} / 5`;
+  const negative = updatedTarget.negativeStatus || {};
+  return `協助成功：${normalizedTarget} ${Number(negative.count || 0)} / ${Number(negative.needed || needed)}`;
 }
 
 async function handleQrPayload(payloadText) {
-  const payload = normalizePayloadText(payloadText);
+  const normalizedPayload = normalizePayloadText(payloadText);
+  const payload = parsePayload(normalizedPayload);
+  const type = payload.type;
+  const value = payload.value;
 
-  console.log("Scanned payload:", payload);
-  showResult("掃描成功：" + payload);
+  console.log("Scanned payload:", normalizedPayload);
+  showResult("掃描成功：" + normalizedPayload);
 
   if (!currentPlayerCode) {
     throw new Error("請先加入遊戲或回到遊戲。");
@@ -655,26 +810,27 @@ async function handleQrPayload(payloadText) {
     throw new Error("找不到玩家資料，請重新回到遊戲。");
   }
 
-  if (payload.startsWith("MATERIAL:")) {
-    const material = payload.split(":")[1]?.toLowerCase();
-    return handlePickupMaterial(player, material);
+  if (type === "WORK") {
+    return handlePickupWork(player, value.toLowerCase());
   }
 
-  if (payload.startsWith("WAREHOUSE:")) {
-    const teamId = payload.split(":")[1]?.toLowerCase();
-    return handleDeliverWarehouse(player, teamId);
+  if (type === "DELIVERY") {
+    return handleDeliverTeam(player, value.toLowerCase());
   }
 
-  if (payload === "BOSS:CENTRAL") {
-    return handleDeliverBoss(player);
+  if (type === "FINAL" && value.toUpperCase() === "MAIN") {
+    return handleDeliverFinal(player);
   }
 
-  if (payload.startsWith("RESCUE:")) {
-    const targetCode = payload.split(":")[1];
-    return handleRescuePlayer(player, targetCode);
+  if (type === "KOUQIU" && value.toUpperCase() === "MAIN") {
+    return handleKouqiu(player);
   }
 
-  throw new Error("不支援的 QR 內容：" + payload);
+  if (type === "RESCUE") {
+    return handleRescuePlayer(player, value);
+  }
+
+  throw new Error("不支援的 QR 內容：" + normalizedPayload);
 }
 
 function showScannerSection() {
@@ -711,13 +867,6 @@ async function stopQrScanner() {
   scannerStarting = false;
 }
 
-function getQrBoxSize() {
-  const width = Math.min(window.innerWidth || 360, 420);
-  const size = Math.max(220, Math.min(300, Math.floor(width * 0.72)));
-
-  return { width: size, height: size };
-}
-
 async function startQrScanner() {
   console.log("已按下掃描按鈕");
 
@@ -751,9 +900,9 @@ async function startQrScanner() {
       return;
     }
 
-    if (player.status === "down") {
+    if (player.status !== "normal") {
       scannerStarting = false;
-      showError("你沒電了，不能行動。");
+      showError("你目前需要協助，不能行動。");
       return;
     }
 
@@ -763,8 +912,6 @@ async function startQrScanner() {
       return;
     }
 
-    console.log("Html5Qrcode 已載入");
-
     const readerEl = document.getElementById("qr-reader");
 
     if (!readerEl) {
@@ -773,24 +920,22 @@ async function startQrScanner() {
       return;
     }
 
-    console.log("找到 qr-reader");
+    readerEl.style.display = "block";
     readerEl.innerHTML = "";
     await stopQrScanner();
     showScannerSection();
 
     scannerInstance = new Html5Qrcode("qr-reader");
 
-    console.log("準備啟動相機");
     await scannerInstance.start(
       { facingMode: "environment" },
       {
         fps: 10,
-        qrbox: getQrBoxSize()
+        qrbox: { width: 250, height: 250 }
       },
       async decodedText => {
         if (!canTrigger(`${currentPlayerCode}:scan:${decodedText}`)) return;
 
-        console.log("Scanned payload:", decodedText);
         showResult("掃描成功：" + decodedText);
 
         await stopQrScanner();
@@ -808,10 +953,9 @@ async function startQrScanner() {
 
     scannerRunning = true;
     scannerStarting = false;
-    console.log("相機啟動成功");
     showResult("相機已啟動，請對準二維碼。");
   } catch (err) {
-    console.error("相機啟動失敗", err);
+    console.error("掃描器啟動失敗", err);
     scannerStarting = false;
     await stopQrScanner();
     showError("掃描器啟動失敗：" + (err && err.message ? err.message : String(err)));
@@ -859,11 +1003,13 @@ async function applyManualPayload() {
 document.addEventListener("DOMContentLoaded", async () => {
   db.ref("/").on("value", snap => {
     latestData = snap.val() || defaultState();
-    document.body.classList.toggle("boss-alert", latestData.boss && latestData.boss.active === true);
+    document.body.classList.toggle("boss-alert", latestData.global?.ignorance?.active === true);
     refreshJoinOptions(latestData);
 
     if (!currentPlayerCode) {
       renderPlayerToScreen(null);
+    } else {
+      renderPlayer(currentPlayerCode).catch(err => console.warn("重新渲染玩家失敗", err));
     }
   });
 

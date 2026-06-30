@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>店長頁</title>
-  <link rel="stylesheet" href="./style.css?v=dev15-20260625-2" />
+  <title>組別戰情頁｜國高中班</title>
+  <link rel="stylesheet" href="./style.css?v=highschool-1" />
 </head>
 
 <body class="team-body">
   <main class="shell page team-shell">
     <section class="hero card team-hero">
       <div>
-        <p class="eyebrow">店長指揮台</p>
+        <p class="eyebrow">組別戰情</p>
         <h1 id="teamName">請選擇組別</h1>
-        <p class="lede">看訂單、看庫存、看組員狀態，決定這一組下一步要跑什麼。</p>
+        <p class="lede">此版本由所有玩家共同分工，本頁僅作為查看組別任務、成員狀態與全場訊息的輔助頁。</p>
       </div>
       <div class="team-controls team-controls-simple">
         <label>
-          指揮組別
+          查看組別
           <select id="teamSelect"></select>
         </label>
       </div>
@@ -30,21 +30,11 @@
       <section class="card section focus-card team-dashboard-card order-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Order</p>
-            <h2>目前訂單</h2>
+            <p class="eyebrow">Task</p>
+            <h2>目前任務</h2>
           </div>
         </div>
-        <div id="orderBox" class="list"></div>
-      </section>
-
-      <section class="card section team-dashboard-card boss-panel">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Boss</p>
-            <h2>魔王需求</h2>
-          </div>
-        </div>
-        <div id="bossNeed" class="list"></div>
+        <div id="taskBox" class="list"></div>
       </section>
 
       <section class="card section team-dashboard-card members-panel">
@@ -60,11 +50,11 @@
       <section class="card section team-dashboard-card inventory-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Stock</p>
-            <h2>本組庫存</h2>
+            <p class="eyebrow">Final</p>
+            <h2>大型任務貢獻</h2>
           </div>
         </div>
-        <div id="inventoryList" class="inventory-grid"></div>
+        <div id="finalBox" class="list"></div>
       </section>
     </section>
 
@@ -81,8 +71,8 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-  <script src="./firebase-config.js?v=dev15-20260625-2"></script>
-  <script src="./app.js?v=dev15-20260625-2"></script>
-  <script src="./team.js?v=dev15-20260625-2"></script>
+  <script src="./firebase-config.js?v=highschool-1"></script>
+  <script src="./app.js?v=highschool-1"></script>
+  <script src="./team.js?v=highschool-1"></script>
 </body>
 </html>

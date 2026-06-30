@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩家入口</title>
-  <link rel="stylesheet" href="style.css?v=dev15-20260625-2" />
+  <title>玩家入口｜國高中班</title>
+  <link rel="stylesheet" href="style.css?v=highschool-1" />
 </head>
 
 <body class="player-body">
   <main class="shell page player-shell">
     <section class="card player-identity-card">
       <div class="player-identity-main">
-        <p class="eyebrow">玩家操作台</p>
+        <p class="eyebrow">活動籌備挑戰</p>
         <h1 id="playerTitle">請先加入遊戲</h1>
-        <p id="playerSubtitle" class="lede">選擇組別、玩家代碼與暱稱後，就可以開始掃描現場二維碼。</p>
+        <p id="playerSubtitle" class="lede">選擇組別、玩家代碼與暱稱後，就可以開始累積工作記錄。</p>
       </div>
       <div id="playerStatusBadge" class="player-status-badge">尚未加入</div>
 
@@ -64,7 +64,7 @@
         </div>
         <label>
           玩家代號
-          <input id="returnCode" placeholder="例如 A01 / B03 / O04" />
+          <input id="returnCode" placeholder="例如 A01 / B03 / H16" />
         </label>
         <div class="toolbar">
           <button type="button" id="lookupReturnBtn">查詢玩家</button>
@@ -78,20 +78,20 @@
       <div class="section-heading">
         <div>
           <p class="eyebrow">現在要做</p>
-          <h2 id="actionHeading">現場操作</h2>
+          <h2 id="actionHeading">掃描現場二維碼</h2>
         </div>
       </div>
 
       <button type="button" id="scanQrBtn" class="scan-button">掃描二維碼</button>
       <button type="button" id="testCameraBtn" class="ghost-button">測試相機</button>
 
-      <p class="action-hint">正常玩法是跑到材料站、倉庫、中央電塔或沒電玩家旁邊掃 QR。掃不到時才使用手動輸入。</p>
+      <p class="action-hint">請到工作小組、任務交付處、叩求點或需要協助的玩家旁邊掃描。掃不到時才使用手動輸入。</p>
 
       <details class="manual-details">
         <summary>掃不到時手動輸入</summary>
         <label class="manual-entry">
           QR 代碼
-          <textarea id="payload" placeholder="MATERIAL:wire / WAREHOUSE:team1 / BOSS:CENTRAL / RESCUE:C04"></textarea>
+          <textarea id="payload" placeholder="WORK:audio / DELIVERY:team1 / FINAL:MAIN / KOUQIU:MAIN / RESCUE:A01"></textarea>
         </label>
         <button type="button" id="applyPayloadBtn">送出掃碼內容</button>
       </details>
@@ -110,10 +110,10 @@
     </section>
 
     <section class="card section down-card" id="downSection" hidden>
-      <p class="eyebrow danger-text">需要救援</p>
-      <h2 class="down-title">你沒電了</h2>
+      <p class="eyebrow danger-text">需要協助</p>
+      <h2 class="down-title" id="downTitle">暫時卡住了</h2>
       <div class="down-progress" id="downProgress">0 / 5</div>
-      <p class="down-note">請讓 5 位不同玩家掃你的救援 QR，你才會恢復行動。</p>
+      <p class="down-note" id="downNote">請讓不同玩家掃你的救援 QR，你才會恢復行動。</p>
       <div class="down-qr-wrap"><div id="downQr"></div></div>
       <p class="qr-text">系統掃碼內容：<strong id="downQrText">RESCUE:----</strong></p>
     </section>
@@ -131,12 +131,12 @@
     <strong id="floatNickname">-</strong>
   </div>
 
-  <script src="vendor/qrcode.min.js?v=dev15-20260625-2"></script>
-  <script src="vendor/html5-qrcode.min.js?v=dev15-20260625-2"></script>
+  <script src="vendor/qrcode.min.js?v=highschool-1"></script>
+  <script src="vendor/html5-qrcode.min.js?v=highschool-1"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-  <script src="firebase-config.js?v=dev15-20260625-2"></script>
-  <script src="app.js?v=dev15-20260625-2"></script>
-  <script src="player.js?v=dev15-20260625-2"></script>
+  <script src="firebase-config.js?v=highschool-1"></script>
+  <script src="app.js?v=highschool-1"></script>
+  <script src="player.js?v=highschool-1"></script>
 </body>
 </html>

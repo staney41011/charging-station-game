@@ -4,16 +4,16 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>主持人後台</title>
-  <link rel="stylesheet" href="./style.css?v=dev15-20260625-2" />
+  <title>主持人後台｜國高中班</title>
+  <link rel="stylesheet" href="./style.css?v=highschool-1" />
 </head>
 
 <body class="admin-body">
   <main class="shell page admin-shell">
     <section class="hero card admin-hero">
-      <p class="eyebrow">控制室</p>
-      <h1>主持人後台</h1>
-      <p class="lede">建立隊伍、啟動遊戲、釋放魔王與現場測試都在這裡完成。穩定版保留在 GitHub 的 live-version，這裡可以放心測新版。</p>
+      <p class="eyebrow">國高中班</p>
+      <h1>活動籌備挑戰後台</h1>
+      <p class="lede">主持人可設定開放組數與每組人數，控制三輪活動任務、最終大型活動、無明來襲與現場測試。</p>
     </section>
 
     <section class="card section control-card">
@@ -28,15 +28,15 @@
       <div class="form-row">
         <label>
           開放組數
-          <input id="teamCount" type="number" min="1" max="15" value="15" />
+          <input id="teamCount" type="number" min="1" max="15" value="8" />
         </label>
         <label>
           每組人數
-          <input id="teamSize" type="number" min="1" max="99" value="4" />
+          <input id="teamSize" type="number" min="1" max="99" value="16" />
         </label>
         <label>
           預估總人數
-          <input id="totalPlayersPreview" type="number" readonly value="60" />
+          <input id="totalPlayersPreview" type="number" readonly value="128" />
         </label>
       </div>
 
@@ -45,50 +45,42 @@
         <button id="gameStartBtn">遊戲開始</button>
         <button id="fullResetBtn" class="danger-button">一鍵重置全部資料</button>
       </div>
-      <p class="muted">建立遊戲會清空舊玩家、舊魔王、舊訂單與各組資料；請在正式開始前設定好組數與每組人數。</p>
+      <p class="muted">建立遊戲會清空舊玩家、舊任務、舊負面狀態與各組資料。正式開始前請先確認組數與每組人數。</p>
     </section>
 
     <section class="card section">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Mission</p>
-          <h2>訂單與魔王</h2>
+          <p class="eyebrow">Rounds</p>
+          <h2>任務輪次控制</h2>
         </div>
+        <div id="roundStatus" class="status-chip">尚未開始</div>
       </div>
 
       <div class="toolbar">
-        <button id="nextOrderBtn">發布下一張訂單</button>
-        <button id="clearOrderBtn">清空目前訂單</button>
-        <button id="boss1Btn">開啟魔王 1</button>
-        <button id="boss2Btn">開啟魔王 2</button>
-        <button id="boss3Btn">開啟魔王 3</button>
-        <button id="boss4Btn">開啟魔王 4</button>
-        <button id="clearBossBtn">清空魔王</button>
+        <button id="round1Btn" class="primary-action">開始第 1 輪</button>
+        <button id="round2Btn">開始第 2 輪</button>
+        <button id="round3Btn">開始第 3 輪</button>
+        <button id="finalTaskBtn" class="primary-action">開始最終大型活動</button>
+        <button id="endGameBtn">遊戲結束</button>
       </div>
+      <p class="muted">每輪會隨機分配活動任務給各組，需求細節不公開，只顯示完成度。三輪後可開啟最終大型活動。</p>
     </section>
 
     <section class="card section">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Custom Boss</p>
-          <h2>自訂魔王</h2>
+          <p class="eyebrow">Ignorance</p>
+          <h2>無明來襲</h2>
         </div>
+        <div id="ignoranceStatus" class="status-chip">未啟動</div>
       </div>
 
-      <div class="form-row">
-        <label>
-          魔王名稱
-          <input id="customBossName" placeholder="例如：手機成癮獸" />
-        </label>
-        <label>
-          魔王血量
-          <input id="customBossHp" type="number" min="1" value="20" />
-        </label>
-      </div>
-      <div id="customBossMaterials" class="form-grid material-grid"></div>
       <div class="toolbar">
-        <button id="openCustomBossBtn">開啟自訂魔王</button>
+        <button id="triggerIgnoranceBtn" class="danger-button">觸發無明來襲</button>
+        <button id="clearIgnoranceBtn">清除本次無明</button>
       </div>
+      <p class="muted">觸發後，全場需到固定地點掃「叩求」QR。目標次數會在 100 到 1000 之間隨機產生，允許同一玩家重複掃描。</p>
     </section>
 
     <section class="card section">
@@ -100,11 +92,10 @@
       </div>
 
       <div class="toolbar">
-        <button id="randomDownBtn">隨機一位正常玩家沒電</button>
-        <button id="restoreDownBtn">恢復所有沒電玩家</button>
-        <button id="clearPlayersBtn">清空舊玩家</button>
-        <button id="releaseNumbersBtn">釋放玩家號碼</button>
-        <button id="clearTeamDataBtn">清空各組分數與庫存</button>
+        <button id="randomNegativeBtn">隨機一位玩家進入負面狀態</button>
+        <button id="restoreNegativeBtn">恢復所有負面狀態</button>
+        <button id="clearPlayersBtn">清空玩家</button>
+        <button id="clearTeamProgressBtn">清空各組進度與分數</button>
       </div>
     </section>
 
@@ -119,11 +110,11 @@
       <div class="form-row">
         <label>
           玩家代號
-          <input id="targetPlayerCode" placeholder="A01 / B03 / O04" />
+          <input id="targetPlayerCode" placeholder="A01 / B03 / H16" />
         </label>
         <label>
-          指定材料
-          <select id="carryMaterial"></select>
+          指定工作記錄
+          <select id="carryWork"></select>
         </label>
         <label>
           直接加分組別
@@ -132,12 +123,22 @@
       </div>
 
       <div class="toolbar">
-        <button id="createTestPlayersBtn">建立測試玩家</button>
-        <button id="setCarryBtn">給某玩家材料</button>
-        <button id="clearCarryBtn">清空某位玩家攜帶材料</button>
-        <button id="setDownBtn">讓指定玩家沒電</button>
+        <button id="createTestPlayersBtn">每組建立 2 位測試玩家</button>
+        <button id="setCarryBtn">給某玩家工作記錄</button>
+        <button id="clearCarryBtn">清空某位玩家攜帶</button>
+        <button id="setNegativeBtn">讓指定玩家進入負面狀態</button>
         <button id="addScoreBtn">分數 +10</button>
       </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Mission Board</p>
+          <h2>目前各組任務</h2>
+        </div>
+      </div>
+      <div id="taskBoard" class="list"></div>
     </section>
 
     <section class="card section">
@@ -164,8 +165,8 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-  <script src="./firebase-config.js?v=dev15-20260625-2"></script>
-  <script src="./app.js?v=dev15-20260625-2"></script>
-  <script src="./admin.js?v=dev15-20260625-2"></script>
+  <script src="./firebase-config.js?v=highschool-1"></script>
+  <script src="./app.js?v=highschool-1"></script>
+  <script src="./admin.js?v=highschool-1"></script>
 </body>
 </html>
