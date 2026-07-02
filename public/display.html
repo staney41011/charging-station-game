@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>投影幕畫面｜國高中班</title>
-  <link rel="stylesheet" href="./style.css?v=highschool-1" />
+  <link rel="stylesheet" href="./style.css?v=highschool-3" />
 </head>
 
 <body class="display-body">
@@ -19,21 +19,14 @@
       <div class="display-live-chip" id="displayCounts">0 人加入</div>
     </section>
 
-    <section class="projector-card battle-arena" id="battlePanel"></section>
-
-    <section class="projector-card score-wall-card">
-      <div class="projector-heading">
-        <span>組別比分牆</span>
-        <small>依分數排序，最多 15 組同時顯示</small>
-      </div>
-      <div id="rankGrid" class="score-wall-grid"></div>
-    </section>
+    <section class="projector-card battle-arena completion-arena" id="battlePanel"></section>
+    <section id="ignoranceOverlay" class="ignorance-overlay" hidden></section>
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-  <script src="./firebase-config.js?v=highschool-1"></script>
-  <script src="./app.js?v=highschool-1"></script>
-  <script src="./display.js?v=highschool-1"></script>
+  <script src="./firebase-config.js?v=highschool-3"></script>
+  <script src="./app.js?v=highschool-3"></script>
+  <script src="./display.js?v=highschool-3"></script>
 </body>
 </html>

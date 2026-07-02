@@ -16,7 +16,7 @@ function safeMessage(game, data) {
   if (ignorance?.active) return `全場叩求進度：${Number(ignorance.count || 0)} / ${Number(ignorance.target || 0)}`;
   if (game.phase === "final") return "全場一起完成最後的大型活動。";
   if (game.phase === "round") return "各組先完成自己的任務，完成後即可支援其他組。";
-  if (game.status === "ended") return "請看組別比分牆，準備進入收束。";
+  if (game.status === "ended") return "請看各組完成度，準備進入收束。";
   if (game.status === "running") return "各組請確認分工，準備開始第一輪活動任務。";
   return "請玩家加入遊戲，一起預備這場活動。";
 }
@@ -25,29 +25,26 @@ function joinedCount(data) {
   return Object.keys(data.players || {}).length;
 }
 
-function renderIgnorancePanel(ignorance) {
+function renderIgnoranceOverlay(ignorance) {
+  if (!ignorance?.active) return "";
+
   const count = Number(ignorance?.count || 0);
   const target = Number(ignorance?.target || 1);
   const pct = Math.max(0, Math.min(100, Math.round((count / target) * 100)));
 
   return `
-    <div class="boss-battle-card">
-      <div class="boss-alert-banner" aria-hidden="true">
-        <span>全場事件</span>
-        <span>叩求進行中</span>
-        <span>保持穩定</span>
-      </div>
-      <div class="boss-battle-copy">
-        <p class="eyebrow">IGNORANCE ALERT</p>
+    <div class="ignorance-overlay-card">
+      <div class="ignorance-siren" aria-hidden="true"></div>
+      <div>
+        <p class="eyebrow">全場事件</p>
         <h2>無明來襲</h2>
-        <div class="battle-callout">請全場輪流到固定地點叩求，累積完成後回到任務。</div>
+        <p>請到固定叩求點掃描 QR。各組任務完成度會持續顯示，叩求完成後立刻回到任務。</p>
       </div>
-      <div class="boss-core" aria-label="叩求進度">
-        <b>叩求進度</b>
-        <span>${count}</span>
-        <small>/ ${target}</small>
+      <div class="ignorance-meter">
+        <strong>${count}</strong>
+        <span>/ ${target}</span>
+        <div class="ignorance-progress"><i style="width:${pct}%"></i></div>
       </div>
-      <div class="boss-hp-track"><div class="boss-hp-fill" style="width:${pct}%"></div></div>
     </div>
   `;
 }
@@ -70,7 +67,7 @@ function renderFinalPanel(finalTask) {
   return `
     <div class="boss-battle-card">
       <div class="boss-battle-copy">
-        <p class="eyebrow">FINAL MISSION</p>
+        <p class="eyebrow">最終大型任務</p>
         <h2>${finalTask.name}</h2>
         <div class="battle-callout">全場共同推進，所有工作記錄都交到大型任務交付處。</div>
       </div>
@@ -99,78 +96,67 @@ function renderRoundPanel(data) {
     `;
   }
 
-  const taskCards = teams.map(([teamId, team]) => {
-    const task = data.tasksByTeam?.[teamId];
-    const percent = taskPercent(task);
+  const taskRows = teams
+    .map(([teamId, team]) => {
+      const task = data.tasksByTeam?.[teamId];
+      const percent = taskPercent(task);
+
+      return {
+        teamId,
+        team,
+        task,
+        percent
+      };
+    })
+    .sort((a, b) => b.percent - a.percent || teamNumber(a.teamId) - teamNumber(b.teamId));
+
+  const topTeam = taskRows[0];
+  const average = taskRows.length
+    ? Math.round(taskRows.reduce((sum, row) => sum + row.percent, 0) / taskRows.length)
+    : 0;
+
+  const cards = taskRows.map((row, index) => {
+    const complete = row.percent >= 100;
 
     return `
-      <div class="team-rank-card ${percent >= 100 ? "top" : ""}">
-        <div class="rank-number">${teamNumber(teamId)}</div>
-        <div>
-          <div class="team-rank-title">${teamDisplayName(teamId, team)}</div>
-          <div class="team-meta">${task ? task.name : "尚未分配任務"}</div>
+      <div class="completion-card ${complete ? "complete" : ""} ${index === 0 ? "leading" : ""}">
+        <div class="completion-rank">${index + 1}</div>
+        <div class="completion-copy">
+          <strong>${teamDisplayName(row.teamId, row.team)}</strong>
+          <span>${row.task ? row.task.name : "尚未分配任務"}</span>
         </div>
-        <div class="team-score">${percent}%</div>
+        <div class="completion-percent">${row.percent}%</div>
+        <div class="completion-track"><i style="width:${row.percent}%"></i></div>
       </div>
     `;
   }).join("");
 
   return `
-    <div class="mission-empty">
-      <span>第 ${game.round || 1} 輪活動任務</span>
-      <strong>完成度戰情</strong>
-      <p>需求明細由各組自行摸索，投影幕只顯示目前推進比例。</p>
+    <div class="completion-hero">
+      <div>
+        <p class="eyebrow">第 ${game.round || 1} 輪活動任務</p>
+        <h2>各組完成度揭示</h2>
+        <p>需求明細不公開，投影幕只顯示每組目前推進比例。</p>
+      </div>
+      <div class="completion-spotlight">
+        <span>目前領先</span>
+        <strong>${topTeam ? teamDisplayName(topTeam.teamId, topTeam.team) : "-"}</strong>
+        <b>${topTeam ? topTeam.percent : 0}%</b>
+      </div>
+      <div class="completion-average">
+        <span>全場平均</span>
+        <strong>${average}%</strong>
+      </div>
     </div>
-    <div class="rank-grid-projector">${taskCards}</div>
+    <div class="completion-grid">${cards}</div>
   `;
 }
 
 function renderMainPanel(data) {
   const game = data.game || {};
-  const ignorance = data.global?.ignorance;
 
-  if (ignorance?.active) return renderIgnorancePanel(ignorance);
   if (game.phase === "final" || game.phase === "final-complete") return renderFinalPanel(data.finalTask);
   return renderRoundPanel(data);
-}
-
-function rankedTeams(data) {
-  return sortedTeamEntries(data.teams)
-    .map(([id, team]) => ({
-      id,
-      name: teamDisplayName(id, team),
-      score: Number(team.score || 0),
-      completedTasks: Number(team.completedTasks || 0),
-      supportDeliveries: Number(team.supportDeliveries || 0),
-      finalContribution: Number(team.finalContribution || 0)
-    }))
-    .sort((a, b) => b.score - a.score || teamNumber(a.id) - teamNumber(b.id));
-}
-
-function renderRanks(data) {
-  const rows = rankedTeams(data).slice(0, 15);
-
-  if (!rows.length) {
-    return `<div class="empty-note">目前尚未建立組別。</div>`;
-  }
-
-  const maxScore = Math.max(1, ...rows.map(team => team.score));
-
-  return rows.map((team, index) => {
-    const width = Math.max(4, Math.round((team.score / maxScore) * 100));
-
-    return `
-      <div class="score-wall-row ${index === 0 ? "top" : ""}">
-        <div class="score-rank">${index + 1}</div>
-        <div class="score-team">
-          <strong>${team.name}</strong>
-          <span>完成 ${team.completedTasks}｜支援 ${team.supportDeliveries}｜大型 ${Math.round(team.finalContribution)}</span>
-        </div>
-        <div class="score-value">${Math.round(team.score)}</div>
-        <div class="score-bar"><i style="width:${width}%"></i></div>
-      </div>
-    `;
-  }).join("");
 }
 
 db.ref("/").on("value", snap => {
@@ -188,5 +174,6 @@ db.ref("/").on("value", snap => {
   $("#displayMessage").textContent = safeMessage(game, data);
   $("#displayCounts").textContent = totalSlots ? `${joined} / ${totalSlots} 人加入` : `${joined} 人加入`;
   $("#battlePanel").innerHTML = renderMainPanel(data);
-  $("#rankGrid").innerHTML = renderRanks(data);
+  $("#ignoranceOverlay").hidden = data.global?.ignorance?.active !== true;
+  $("#ignoranceOverlay").innerHTML = renderIgnoranceOverlay(data.global?.ignorance);
 });
