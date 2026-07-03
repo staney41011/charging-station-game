@@ -8,7 +8,7 @@ function initRulesEntryQr() {
   const qrEl = document.getElementById("rulesEntryQr");
   const textEl = document.getElementById("rulesEntryQrText");
   const errorEl = document.getElementById("rulesEntryQrError");
-  const entryUrl = "https://charging-station-game.web.app/player.html";
+  const entryUrl = "https://charging-station-game.web.app/player.html?openExternalBrowser=1";
 
   if (textEl) textEl.textContent = entryUrl;
   if (!qrEl) return;

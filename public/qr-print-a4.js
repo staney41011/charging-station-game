@@ -103,8 +103,8 @@ function renderPages() {
       container.innerHTML = "";
       new QrCtor(container, {
         text: item.payload,
-        width: 340,
-        height: 340,
+        width: 520,
+        height: 520,
         correctLevel: QrCtor.CorrectLevel?.M ?? 0
       });
     } catch (err) {

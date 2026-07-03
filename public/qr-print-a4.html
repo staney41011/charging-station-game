@@ -4,14 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>正式列印二維碼｜國高中班</title>
-  <link rel="stylesheet" href="style.css?v=highschool-1" />
+  <link rel="stylesheet" href="style.css?v=highschool-qr-print-2" />
+  <style>
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 8mm;
+      }
+    }
+  </style>
 </head>
 <body class="qr-print-body">
   <main class="qr-print-shell">
     <div class="no-print qr-print-topbar">
       <h1>活動籌備挑戰現場二維碼列印表</h1>
       <button id="printPageBtn" class="print-btn">列印本頁</button>
-      <p class="muted">正式列印用，一頁一個 QR。含 15 組任務交付處，共 <strong id="qrPageCount">27</strong> 頁。</p>
+      <p class="muted">正式列印用，A4 橫式，一頁一個大型 QR。含 15 組任務交付處，共 <strong id="qrPageCount">27</strong> 頁。</p>
       <div class="muted">二維碼產生器狀態：<strong id="qrLibraryStatus">檢查中</strong></div>
       <div class="muted">qrcode.min.js 路徑：<strong>vendor/qrcode.min.js</strong></div>
     </div>
@@ -20,8 +28,8 @@
     <div id="qrPrintPages"></div>
   </main>
 
-  <script src="vendor/qrcode.min.js?v=highschool-1"></script>
-  <script src="app.js?v=highschool-1"></script>
-  <script src="qr-print-a4.js?v=highschool-1"></script>
+  <script src="vendor/qrcode.min.js?v=highschool-qr-print-2"></script>
+  <script src="app.js?v=highschool-qr-print-2"></script>
+  <script src="qr-print-a4.js?v=highschool-qr-print-2"></script>
 </body>
 </html>

@@ -100,7 +100,7 @@ const ROUND_DURATION_MS = 10 * 60 * 1000;
 const FINAL_DURATION_MS = 10 * 60 * 1000;
 const MAX_PROFICIENCY = 3;
 const PROFICIENCY_STEP = 0.1;
-const PLAYER_ENTRY_URL = "https://charging-station-game.web.app/player.html";
+const PLAYER_ENTRY_URL = "https://charging-station-game.web.app/player.html?openExternalBrowser=1";
 const TEAM_LETTERS = Array.from({ length: MAX_TEAMS }, (_, i) => String.fromCharCode(65 + i));
 const TEAM_NAMES = TEAM_LETTERS.reduce((map, letter, index) => {
   map[`team${index + 1}`] = letter;
