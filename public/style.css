@@ -3097,6 +3097,72 @@ body.display-body .completion-grid {
   color: #d4fff8;
 }
 
+.qr-entry-slide h2 {
+  max-width: 980px;
+}
+
+.deck-entry-layout {
+  display: grid;
+  grid-template-columns: minmax(420px, 0.86fr) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: center;
+}
+
+.deck-entry-qr-frame {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  border: 1px solid rgba(255, 206, 92, 0.46);
+  border-radius: 38px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 206, 92, 0.18), transparent 58%),
+    rgba(255, 255, 255, 0.08);
+  padding: clamp(22px, 2.4vw, 38px);
+  box-shadow:
+    0 0 52px rgba(255, 206, 92, 0.14),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.presentation-entry-qr {
+  display: grid;
+  place-items: center;
+  width: min(42vw, 430px);
+  aspect-ratio: 1;
+  border: 10px solid #fff;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow:
+    0 18px 54px rgba(0, 0, 0, 0.34),
+    0 0 0 2px rgba(255, 206, 92, 0.34);
+}
+
+.presentation-entry-qr canvas,
+.presentation-entry-qr img {
+  width: 100% !important;
+  height: 100% !important;
+  image-rendering: pixelated;
+}
+
+.deck-entry-copy {
+  display: grid;
+  gap: 18px;
+}
+
+.deck-entry-url {
+  margin: 0;
+  color: #9fb0c8;
+  font-size: clamp(0.95rem, 1vw, 1.18rem);
+  font-weight: 900;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.deck-entry-url strong {
+  color: #fff4c7;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: clamp(1rem, 1.1vw, 1.28rem);
+}
+
 .deck-controls {
   position: fixed;
   z-index: 10;

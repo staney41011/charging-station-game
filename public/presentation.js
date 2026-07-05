@@ -1,3 +1,4 @@
+const ENTRY_URL = "https://charging-station-game.web.app/player.html?openExternalBrowser=1";
 const slides = Array.from(document.querySelectorAll(".deck-slide"));
 const prevBtn = document.getElementById("prevSlideBtn");
 const nextBtn = document.getElementById("nextSlideBtn");
@@ -22,6 +23,41 @@ function renderDots() {
     if (!button) return;
     goToSlide(Number(button.dataset.slide));
   });
+}
+
+function getQrConstructor() {
+  if (typeof window.QRCode === "function") return window.QRCode;
+  if (typeof QRCode === "function") return QRCode;
+  return null;
+}
+
+function initEntryQr() {
+  const qrEl = document.getElementById("presentationEntryQr");
+  const textEl = document.getElementById("presentationEntryText");
+  const errorEl = document.getElementById("presentationQrError");
+  const QrCtor = getQrConstructor();
+
+  if (textEl) textEl.textContent = ENTRY_URL;
+  if (!qrEl) return;
+
+  if (!QrCtor) {
+    if (errorEl) errorEl.hidden = false;
+    console.error("QRCode 未載入，請檢查 vendor/qrcode.min.js。");
+    return;
+  }
+
+  try {
+    qrEl.innerHTML = "";
+    new QrCtor(qrEl, {
+      text: ENTRY_URL,
+      width: 360,
+      height: 360,
+      correctLevel: QrCtor.CorrectLevel ? QrCtor.CorrectLevel.H : undefined
+    });
+  } catch (err) {
+    if (errorEl) errorEl.hidden = false;
+    console.error("簡報玩家入口 QR 產生失敗", err);
+  }
 }
 
 function updateSlide() {
@@ -81,3 +117,4 @@ fullscreenBtn?.addEventListener("click", enterFullscreen);
 
 renderDots();
 updateSlide();
+initEntryQr();

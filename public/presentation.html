@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>活動籌備挑戰｜簡報版</title>
-  <link rel="stylesheet" href="style.css?v=highschool-presentation-1" />
+  <link rel="stylesheet" href="style.css?v=highschool-presentation-2" />
 </head>
 <body class="presentation-body">
   <main class="presentation-deck" aria-live="polite">
@@ -156,17 +156,34 @@
         <li>最後大型活動是全場共同完成。</li>
       </ol>
     </section>
+
+    <section class="deck-slide qr-entry-slide" data-slide-title="玩家加入">
+      <p class="deck-kicker">準備開始</p>
+      <h2>掃描 QR 加入遊戲</h2>
+      <div class="deck-entry-layout">
+        <div class="deck-entry-qr-frame">
+          <div id="presentationEntryQr" class="presentation-entry-qr"></div>
+          <p id="presentationQrError" class="deck-note danger-text" hidden>二維碼產生失敗，請改用下方網址。</p>
+        </div>
+        <div class="deck-entry-copy">
+          <p class="deck-lede">請用手機掃描這張 QR，進入玩家入口後選組別、玩家代碼與暱稱。</p>
+          <p class="deck-note">建議使用 Chrome 或 Safari 開啟。若從 LINE 等 App 掃描，系統會嘗試引導到外部瀏覽器。</p>
+          <p class="deck-entry-url">玩家入口網址<br><strong id="presentationEntryText">https://charging-station-game.web.app/player.html?openExternalBrowser=1</strong></p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <nav class="deck-controls no-print" aria-label="簡報控制">
     <button id="prevSlideBtn" type="button">上一頁</button>
-    <div id="slideProgress" class="slide-progress">1 / 12</div>
+    <div id="slideProgress" class="slide-progress">1 / 13</div>
     <button id="nextSlideBtn" type="button">下一頁</button>
     <button id="fullscreenBtn" type="button">全螢幕</button>
   </nav>
 
   <div id="slideDots" class="slide-dots no-print" aria-label="投影片列表"></div>
 
-  <script src="presentation.js?v=highschool-presentation-1"></script>
+  <script src="vendor/qrcode.min.js?v=highschool-presentation-2"></script>
+  <script src="presentation.js?v=highschool-presentation-2"></script>
 </body>
 </html>
